@@ -1,8 +1,19 @@
-version: '1'
+version: "1"
 services:
   app:
     image: reviews
     container_name: reviews
     restart: always
     ports:
-    - 443:3000
+    - 433:3000
+    network:
+    - rewnet
+    volumes:
+    - data: /data
+
+networks:
+  rewnet:
+    driver: bridge
+
+volumes:
+  data:
