@@ -1,9 +1,9 @@
-version: "1"
+version: 1.0
 services:
   app:
-    image: reviews
+    image: nextjs-reviews
     container_name: reviews
-    restart: always
+    # restart: always
     ports:
     - 433:3000
     network:
