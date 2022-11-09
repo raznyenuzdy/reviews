@@ -2,17 +2,17 @@ version: "3"
 services:
   nextjs-reviews:
     image: nextjs-reviews
-    # container_name: reviews
+    container_name: reviews
     ports:
-    - 433:3000
-    # networks:
-    # - rewnet
-    # volumes:
-    # - data:/app/data
+    - 3000:3000
+    networks:
+    - rewnet
+    volumes:
+    - data:/app/data
 
-# networks:
-#   rewnet:
-#     driver: bridge
+networks:
+  rewnet:
+    driver: bridge
 
-# volumes:
-#   data:
+volumes:
+  data:
