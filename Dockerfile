@@ -5,6 +5,6 @@ ADD . .
 RUN npm install
 ENV NODE_ENV=production
 RUN npm run build
-RUN npm prune --production
+# RUN npm prune --production
 EXPOSE 3000
 CMD "npm" "start"
