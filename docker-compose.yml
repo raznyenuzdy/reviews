@@ -1,12 +1,11 @@
-version: 1.0
+version: "1"
 services:
   app:
     image: nextjs-reviews
     container_name: reviews
-    # restart: always
     ports:
     - 433:3000
-    network:
+    networks:
     - rewnet
     volumes:
     - data: /data
