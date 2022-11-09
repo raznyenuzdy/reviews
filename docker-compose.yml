@@ -1,5 +1,5 @@
 services:
-  api:
+  reviews:
     image: nextjs-reviews
     container_name: reviews
     ports:
