@@ -1,5 +1,6 @@
 FROM node:16-alpine3.16
 WORKDIR /var/www/reviews
+RUN apk update && apk upgrade && apk --no-cache add curl
 # ADD package.json package.json
 ADD . .
 RUN npm install
