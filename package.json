@@ -12,28 +12,28 @@
     "@auth0/auth0-react": "^1.12.0",
     "@auth0/nextjs-auth0": "^1.9.2",
     "@chakra-ui/icons": "^2.0.11",
-    "@chakra-ui/react": "^2.3.6",
+    "@chakra-ui/react": "^2.3.7",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@fortawesome/fontawesome-free-solid": "^5.0.13",
     "@fortawesome/fontawesome-svg-core": "^6.2.0",
     "@fortawesome/free-solid-svg-icons": "^6.2.0",
     "@fortawesome/react-fontawesome": "^0.2.0",
-    "chakra-dayzed-datepicker": "^0.2.4",
+    "chakra-dayzed-datepicker": "^0.2.5",
     "cross-env": "^7.0.3",
     "date-fns": "^2.29.3",
     "dayzed": "^3.2.3",
     "formik": "^2.2.9",
-    "framer-motion": "^7.6.3",
+    "framer-motion": "^7.6.5",
     "jsonwebtoken": "^8.5.1",
-    "next": "^13.0.1",
+    "next": "^13.0.2",
     "next-joi": "^2.2.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-router-dom": "^6.4.2"
+    "react-router-dom": "^6.4.3"
   },
   "devDependencies": {
-    "eslint": "^8.26.0",
-    "eslint-config-next": "^13.0.1"
+    "eslint": "^8.27.0",
+    "eslint-config-next": "^13.0.2"
   }
 }
