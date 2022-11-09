@@ -1,8 +1,8 @@
 version: "3"
 services:
-  reviews:
+  nextjs-reviews:
     image: nextjs-reviews
-    container_name: reviews
+    # container_name: reviews
     ports:
     - 433:3000
     # networks:
