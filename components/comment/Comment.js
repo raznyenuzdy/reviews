@@ -85,7 +85,7 @@ const Comment = ({
         // setComment(comment);
         // comment.children = comment.children ? comment.children.concat(reply) : [reply];
         setModel(model.concat(reply));
-        replies = replies ? replies.concat(reply) : [reply];
+        // replies = replies ? replies.concat(reply) : [reply];
         setReplies(comment.children);
         setActiveComment(null);
     };

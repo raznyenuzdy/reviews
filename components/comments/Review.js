@@ -172,8 +172,7 @@ const Review = () => {
         }
         const back = await addComment(obj);
         const block = adjustLoadedBlock(back);
-        model = model.concat(block);
-        setModel(model);
+        setModel(model.concat(block));
         console.log("MODEL:", model);
         setText("");
         setLabel("");
@@ -193,7 +192,7 @@ const Review = () => {
     }
 
     const onTextAreaEdit = (e) => {
-        text = e;
+        // text = e;
         // setText(e);
         // console.log("TEXT:", e, text);
         // setIsTextareaEmty(text.length === 0)
