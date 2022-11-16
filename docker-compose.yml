@@ -5,7 +5,7 @@ services:
     container_name: reviews
     build:
       context: .
-      target: development
+      # target: development
       dockerfile: ./Dockerfile
     ports:
       - 3000:3000
