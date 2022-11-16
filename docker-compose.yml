@@ -3,13 +3,18 @@ services:
   nextjs-reviews:
     image: nextjs-reviews
     container_name: reviews
+    build:
+      context: .
+      target: development
+      dockerfile: ./Dockerfile
     ports:
-    - 3000:3000
+      - 3000:3000
     networks:
-    - rewnet
+      - rewnet
     volumes:
-    - data:/app/data
-
+      - data:/app/data
+  nginx:
+    build: ./nginx
 networks:
   rewnet:
     driver: bridge
