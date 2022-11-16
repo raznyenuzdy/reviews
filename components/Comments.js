@@ -1,18 +1,20 @@
 import { useState, useEffect, useRef } from "react";
-import { Avatar, Box, Center, Select, Skeleton, SkeletonCircle, SkeletonText, Wrap, NumberInput, NumberDecrementStepper, NumberInputStepper, NumberIncrementStepper, NumberInputField, WrapItem, Badge, Button, Container, Text, VStack, Stack, HStack, Flex, Spacer } from '@chakra-ui/react';
+import { Avatar, Box, Center, Select, Skeleton, SkeletonCircle, SkeletonText, Wrap, NumberInput, NumberDecrementStepper, NumberInputStepper, NumberIncrementStepper, NumberInputField, WrapItem, Badge, Button, Container, Text, VStack, Stack, HStack, Flex, Spacer, Link } from '@chakra-ui/react';
 import CommentForm from "./comment/CommentForm";
 import Review from './comments/Review';
 import Comment from "./comment/Comment";
 import { useGrantsContext } from "../context/auth.context";
 import { useModelContext } from "../context/model.context";
 import { useMenuContext } from "../context/menu.context";
+import InfiniteScroll from "react-infinite-scroll-component";
 import Config from '../startup/config';
 import { key, blockType } from '../utils/utils';
+import { getBlocks } from '../db/model2';
 import { adjustBlock } from '../db/model2';
-
 
 const Comments = () => {
     // const { model, adminMenu, setModel } = useModelContext();
+    const [hasMore, setHasMore] = useState(true);
     const [state, setState] = useModelContext();
     const { grants, setGrants } = useGrantsContext();
     const { menu } = useMenuContext();
@@ -58,17 +60,36 @@ const Comments = () => {
 
     }
 
+    const getMorePost = async () => {
+        const loaded = await getBlocks(state.page);
+        if (loaded) {
+            console.log('>>>>', state.page);
+            state.setPage(++state.page);
+            state.model = state.model.concat(loaded);
+            state.setModel(state.model);
+        }
+    };
+
     return (
         <Box overflow={'hidden'}>
             <Review submitLabel="Write" />
-            {state.model.map((comment) => (!comment.parentId && (!comment.deleted || menu.showDeleted) ?
-                <Comment
-                    key={key()}
-                    id={comment.id}
-                    comment={comment}
-                    depth={0}
-                /> : null
-            ))}
+            <InfiniteScroll
+                dataLength={state.model.length}
+                next={getMorePost}
+                hasMore={hasMore}
+                loader={<h3> Loading...</h3>}
+                endMessage={<h4>Nothing more to show</h4>}
+            >
+                {state.model.map((comment) => (!comment.parentId && (!comment.deleted || menu.showDeleted) ?
+                    <Comment
+                        key={key()}
+                        id={comment.id}
+                        comment={comment}
+                        depth={0}
+                    /> : null
+                ))}
+                <Link>Next</Link>
+            </InfiniteScroll>
         </Box>
     )
 }

@@ -14,7 +14,12 @@ const AnchorLogoutButton = ({ children, href, className, prefix, icon, tabIndex,
 
     return (
         <a onClick={() => logOff()}>
-            <NavBarItem className={className} icon={icon} tabIndex={tabIndex} testId={testId} mr={mr}>
+            <NavBarItem 
+            className={className} 
+            icon={icon} 
+            tabIndex={tabIndex} 
+            testId={testId} 
+            mr={mr}>
                 {children}
             </NavBarItem>
         </a>

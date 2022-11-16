@@ -27,19 +27,29 @@ export const GrantsContextProvider = ({ children }) => {
     }, [user]);
 
     const ErrorResponseToaster = (responseData) => {
-        if (responseData.message && Array.isArray(responseData.message)) {
-            responseData.message.forEach(text =>
+        if (responseData.message) {
+            if (Array.isArray(responseData.message)) {
+                responseData.message.forEach(text => {
+                    toast({
+                        title: `${text}`,
+                        status: `error`,
+                        isClosable: true,
+                    })
+                }
+                )
+            } else {
                 toast({
-                    title: `${text}`,
+                    title: `${responseData.message}`,
                     status: `error`,
                     isClosable: true,
                 })
-            );
+            }
         }
     }
 
     const AuthRole = async (grants, setGrantsState, getAccessTokenSilently, isAuthenticated, logout) => {
         try {
+            console.log('??????????????', grants);
             // what happens at parrent component as reaction on auth events
             // toast = callback;
             if (!isAuthenticated){
@@ -78,6 +88,7 @@ export const GrantsContextProvider = ({ children }) => {
                 options
             );
             const responseData = await response.json();
+            console.log('!!!!!!!', responseData);
             switch (response.status) {
                 case 200:
                     grants.hash = responseData.hash ? responseData.hash : null;
@@ -89,8 +100,12 @@ export const GrantsContextProvider = ({ children }) => {
                 case 400:
                     ErrorResponseToaster(responseData);
                     break;
-                case 500:
+                case 401:
                     logout();
+                    ErrorResponseToaster(responseData);
+                    break;
+                case 500:
+                    // logout();
                     setGrantsState(null);
                     ErrorResponseToaster(responseData);
                     break;

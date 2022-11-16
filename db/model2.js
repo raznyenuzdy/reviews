@@ -658,62 +658,6 @@ const getBlocksDb = async (page, grants) => {
     );
     const resp = await response.json();
     return [].concat(resp ?? []);
-
-    return await [{
-        id: 0,
-        ref_parent: null,
-        ref_user: 1,
-        ref_page: 0,
-        type: "ad",
-        label: "This is the topic of the day",
-        text: "Body text",
-        createdAt: "2022-09-16T23:00:33.010+02:00",
-        modifiedAt: "2022-10-02T23:00:33.010+02:00",
-    },{
-        "id": 16,
-        "ref_user": 2,
-        "type": "ad",
-        "ref_page": 0,
-        "label": "Some kind of label",
-        "text": "ewrtwertsdgsdfg",
-        "createdAt": "2022-10-16T10:28:41.540Z",
-        "updatedAt": "2022-10-16T10:28:41.540Z"
-    },
-    { "id": 15, "ref_user": 2, "user_model": "{\"id\":2,\"user_id\":\"auth0|631722065d9f46743dcdaf20\",\"email\":\"raznyenuzdy@gmail.com\",\"email_verified\":\"true\",\"name\":\"raznyenuzdy@gmail.com\",\"nickname\":\"raznyenuzdy\",\"picture\":\"https://s.gravatar.com/avatar/258f7074052b071139f76f08ec2d54cb?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fra.png\",\"role\":\"guest\",\"created_at\":\"2022-09-06T10:33:42.343Z\",\"updated_at\":\"2022-10-11T14:41:39.808Z\",\"last_password_reset\":\"2022-09-06T12:12:48.961Z\",\"last_ip\":\"5.90.193.224\",\"last_login\":\"2022-10-11T14:41:39.808Z\",\"logins_count\":\"61\",\"createdAt\":\"2022-10-14T00:46:42.664Z\",\"updatedAt\":\"2022-10-14T00:46:42.664Z\"}", "ref_page": 0, "theme": "", "label": "", "text": "ewrtwertsdgsdfg", "createdAt": "2022-10-16T10:28:41.537Z", "updatedAt": "2022-10-16T10:28:41.537Z" }, { "id": 14, "ref_user": 2, "user_model": "{\"id\":2,\"user_id\":\"auth0|631722065d9f46743dcdaf20\",\"email\":\"raznyenuzdy@gmail.com\",\"email_verified\":\"true\",\"name\":\"raznyenuzdy@gmail.com\",\"nickname\":\"raznyenuzdy\",\"picture\":\"https://s.gravatar.com/avatar/258f7074052b071139f76f08ec2d54cb?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fra.png\",\"role\":\"guest\",\"created_at\":\"2022-09-06T10:33:42.343Z\",\"updated_at\":\"2022-10-11T14:41:39.808Z\",\"last_password_reset\":\"2022-09-06T12:12:48.961Z\",\"last_ip\":\"5.90.193.224\",\"last_login\":\"2022-10-11T14:41:39.808Z\",\"logins_count\":\"61\",\"createdAt\":\"2022-10-14T00:46:42.664Z\",\"updatedAt\":\"2022-10-14T00:46:42.664Z\"}", "ref_page": 0, "theme": "", "label": "", "text": "ewrtwertsdgsdfg", "createdAt": "2022-10-16T10:28:41.529Z", "updatedAt": "2022-10-16T10:28:41.529Z" }, { "id": 13, "ref_user": 2, "user_model": "{\"id\":2,\"user_id\":\"auth0|631722065d9f46743dcdaf20\",\"email\":\"raznyenuzdy@gmail.com\",\"email_verified\":\"true\",\"name\":\"raznyenuzdy@gmail.com\",\"nickname\":\"raznyenuzdy\",\"picture\":\"https://s.gravatar.com/avatar/258f7074052b071139f76f08ec2d54cb?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fra.png\",\"role\":\"guest\",\"created_at\":\"2022-09-06T10:33:42.343Z\",\"updated_at\":\"2022-10-11T14:41:39.808Z\",\"last_password_reset\":\"2022-09-06T12:12:48.961Z\",\"last_ip\":\"5.90.193.224\",\"last_login\":\"2022-10-11T14:41:39.808Z\",\"logins_count\":\"61\",\"createdAt\":\"2022-10-14T00:46:42.664Z\",\"updatedAt\":\"2022-10-14T00:46:42.664Z\"}", "ref_page": 0, "theme": "", "label": "", "text": "346346345646", "createdAt": "2022-10-15T21:30:36.938Z", "updatedAt": "2022-10-15T21:30:36.938Z" }, { "id": 12, "ref_user": 2, "user_model": "{\"id\":2,\"user_id\":\"auth0|631722065d9f46743dcdaf20\",\"email\":\"raznyenuzdy@gmail.com\",\"email_verified\":\"true\",\"name\":\"raznyenuzdy@gmail.com\",\"nickname\":\"raznyenuzdy\",\"picture\":\"https://s.gravatar.com/avatar/258f7074052b071139f76f08ec2d54cb?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fra.png\",\"role\":\"guest\",\"created_at\":\"2022-09-06T10:33:42.343Z\",\"updated_at\":\"2022-10-11T14:41:39.808Z\",\"last_password_reset\":\"2022-09-06T12:12:48.961Z\",\"last_ip\":\"5.90.193.224\",\"last_login\":\"2022-10-11T14:41:39.808Z\",\"logins_count\":\"61\",\"createdAt\":\"2022-10-14T00:46:42.664Z\",\"updatedAt\":\"2022-10-14T00:46:42.664Z\"}", "ref_page": 0, "theme": "", "label": "", "text": "tryurttryu", "createdAt": "2022-10-15T21:30:20.072Z", "updatedAt": "2022-10-15T21:30:20.072Z" }];
-
-/*
-    return await [{
-        id: 0,
-        ref_parent: null,
-        ref_user: 1,
-        ref_page: 0,
-        type: "ad",
-        label: "This is the topic of the day",
-        text: "Body text",
-        createdAt: "2022-09-16T23:00:33.010+02:00",
-        modifiedAt: "2022-10-02T23:00:33.010+02:00",
-    }, {
-        id: 1,
-        ref_parent: null,
-        ref_user: 1,
-        ref_page: 0,
-        type: "review",
-        label: "Revise my experience",
-        text: "Box is the most abstract component on top of which all other Chakra UI components are built. By default, it renders a `div` element",
-        createdAt: "2022-09-26T23:00:33.010+02:00",
-        modifiedAt: "2022-10-03T23:00:33.010+02:00",
-    }, {
-        id: 3,
-        ref_parent: 1,
-        ref_user: 1,
-        ref_page: 0,
-        type: "org",
-        label: "Official response",
-        text: "First comment first child",
-        createdAt: "2022-09-26T23:00:33.010+02:00",
-        modifiedAt: "2022-10-03T23:00:33.010+02:00",
-    }]
-    */
 }
 
 const aa = {

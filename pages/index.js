@@ -10,7 +10,6 @@ export async function getServerSideProps(context) {
 }
 
 export default function Index({model}) {
-    console.log(model)
     return (
         <TimeLine model={model}/>
     );

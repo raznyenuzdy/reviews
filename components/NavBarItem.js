@@ -13,9 +13,13 @@ const NavBarItem = ({ children, href, className, icon, tabIndex, testId, mr }) =
     const activeClasses = className ? `${className} ${activeClass}` : activeClass;
 
     return (
-        <Stack direction={['row']}>
-            {icon && <Box><FontAwesomeIcon icon={icon} size="2xl" /></Box>}
-            <Box className={router.asPath === href ? activeClasses : className} tabIndex={tabIndex} data-testid={testId}>
+        <Stack direction={['row']} alignItems="center">
+            {icon && <Box fontSize={['2xl']}><FontAwesomeIcon icon={icon} /></Box>}
+            <Box
+            className={router.asPath === href ? activeClasses : className} 
+            tabIndex={tabIndex} 
+            fontSize={['xs','sm','md','lg','xl']}
+            data-testid={testId}>
                 {children}
             </Box>
         </Stack>
