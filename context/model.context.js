@@ -2,11 +2,11 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { getBlocks } from '../db/model2';
 import { useGrantsContext } from './auth.context';
 
-export const ModelContext = createContext({});
+export const ModelContext = createContext([]);
 
-export const ModelContextProvider = ({ children }) => {
-    const [page, setPage] = useState(0);
-    const [model, setModel] = useState([]);
+export const ModelContextProvider = ({ children, _model }) => {
+    const [page, setPage] = useState(1);
+    const [model, setModel] = useState(_model);
     const [modelLoading] = useState(false);
     const {grants, isLoading} = useGrantsContext();
     const [state, setState] = useState({ model, setModel, modelLoading, page, setPage });
@@ -24,7 +24,7 @@ export const ModelContextProvider = ({ children }) => {
     }, [page, isLoading, grants]);
 */
     return (
-        <ModelContext.Provider value={[state, setState]}>
+        <ModelContext.Provider value={{state, setState}}>
             {children}
         </ModelContext.Provider>)
 }

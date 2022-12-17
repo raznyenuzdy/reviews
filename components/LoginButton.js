@@ -5,10 +5,11 @@ import { Button } from '@chakra-ui/react';
 import { useAuth0 } from '@auth0/auth0-react';
 
 const LoginButton = ({ colorScheme, children, className, icon, tabIndex, testId, disabled=false, size='sm' }) => {
-    const { loginWithPopup } = useAuth0();
+    const { loginWithPopup, loginWithRedirect } = useAuth0();
     return (
         <Button
             onClick={loginWithPopup}
+            // onClick={loginWithRedirect}
             colorScheme={colorScheme}
             className={className}
             icon={icon}

@@ -52,7 +52,7 @@ export default function SmallWithLogoLeft() {
                 justify={{ base: 'center', md: 'space-between' }}
                 align={{ base: 'center', md: 'center' }}>
                     <Logo1 />
-                <Text>© All rights reserved</Text>
+                <Box>© All rights reserved</Box>
                 <Stack direction={'row'} spacing={6}>
                     {/* <SocialButton label={'Twitter'} href={'#'}>
                         <FaTwitter />

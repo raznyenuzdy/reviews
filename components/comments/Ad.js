@@ -52,7 +52,6 @@ const Review = ({
     const isBoss = ['admin', 'moder'].find(v => v === grants?.role);
 
     const openProfileGBL = () => {
-        console.log("Profile");
         return false;
     }
 
@@ -109,7 +108,6 @@ const Review = ({
     }
 
     const addComment = async (block) => {
-        console.log("BLOCK!??", block);
         grants.token = grants.token ? grants.token : await getAccessTokenSilently();
         const options = {
             headers: {
@@ -119,16 +117,14 @@ const Review = ({
             body: JSON.stringify(block),
             method: 'POST',
         }
-        console.log(block);
         const response = await fetch(
-            `http://localhost:5000/api/block`,
+            `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/block`,
             options
         );
         switch (response.status) {
             case '200':
             case '201':
                 const responseData = await response.json();
-                console.log("CAME BACK:", responseData);
                 return responseData;
             case '500':
                 toast({
@@ -140,7 +136,6 @@ const Review = ({
             default:
                 break;
         }
-        console.log(response.status);
         // const obj = adjustBlock(responseData)
         // model = model.concat(obj);
         // setModel(model);
@@ -149,7 +144,6 @@ const Review = ({
     }
 
     const prepAdType = () => {
-        console.log("WHOAMI:", grants.role);
         switch (grants.role) {
             case 'admin':
             case 'moder':
@@ -180,13 +174,12 @@ const Review = ({
             label, //: grants.role === 'user' ? null : label,
             text,
             // createdAt: new Date().toISOString(),
-            // modifiedAt: null,
+            // updatedAt: null,
         }
         const back = await addComment(obj);
         const block = adjustLoadedBlock(back);
         model = model.concat(block);
         setModel(model);
-        console.log("MODEL:", model);
         setText("");
         setLabel("");
     }
@@ -208,13 +201,13 @@ const Review = ({
 
     const gblInput = () => (
         <HStack>
-            <Text><nobr>GBL Number</nobr></Text>
+            <Box><nobr>GBL Number</nobr></Box>
             <Input bg='orange.50' variant='outline' value={gbl} onChange={handleChangeGbl} placeholder={gblPlaceholder} />
         </HStack>
     )
 
     const gblOrTextIsEmpty = () => {
-        return (<Text color='green'>To proof, please, let to know your GBL number.</Text>)
+        return (<Box color='green'>To proof, please, let to know your GBL number.</Box>)
         // return (textAreaBlured && !isTextareaEmty && isGblEmpty) ?
         //     <Box bg='green' w='100%' p={2} color='white'>To proof, please, let to know your GBL number.</Box> :
         //     (textAreaBlured && !isTextareaEmty && isGblEmpty) ?
@@ -244,7 +237,6 @@ const Review = ({
     const onTextAreaEdit = (e) => {
         text = e;
         // setText(e);
-        // console.log("TEXT:", e, text);
         // setIsTextareaEmty(text.length === 0)
     }
     // gbl.length === 0
@@ -272,7 +264,7 @@ const Review = ({
     return (
         <>
             <Stack spacing={4} direction='row' align='center'>
-                <Text>Have something to write?</Text>
+                <Box>Have something to write?</Box>
                 <Button colorScheme='blue' size='sm' onClick={isOpen ? onClose : onOpen}>Yes</Button>
             </Stack>
 
@@ -289,7 +281,7 @@ const Review = ({
                             <FormControl>
                                 <form onSubmit={onSubmit}>
                                     <Stack align='left' spacing={1} pt='2' pb='2'>
-                                        <Text size='xl'>Your gbl is :</Text>
+                                        <Box size='xl'>Your gbl is :</Box>
                                         <Input bg='orange.50' variant='outline' value={label} onChange={handleChangeLabel} placeholder={labelPlaceholder} />
                                         <Select placeholder='More details about experience'>
                                             <option value='option1'>My booking service experience</option>

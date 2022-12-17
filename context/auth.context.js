@@ -11,8 +11,8 @@ export const GrantsContextProvider = ({ children }) => {
     const [grants, setGrantsState] = useState({ ...user, role: "" });
     const [grantsLoading, setGrantsLoading] = useState(false);
     const toast = useToast();
-
-    const state = { grants, isLoading, isAuthenticated, grantsLoading, setGrantsState };
+    const boss = ['admin', 'moder'].find(v => v === grants?.role);
+    const state = { grants, isLoading, isAuthenticated, grantsLoading, setGrantsState, boss };
 
     useEffect(() => {
         async function fetchData() {
@@ -49,7 +49,6 @@ export const GrantsContextProvider = ({ children }) => {
 
     const AuthRole = async (grants, setGrantsState, getAccessTokenSilently, isAuthenticated, logout) => {
         try {
-            console.log('??????????????', grants);
             // what happens at parrent component as reaction on auth events
             // toast = callback;
             if (!isAuthenticated){
@@ -63,13 +62,11 @@ export const GrantsContextProvider = ({ children }) => {
             const body = { email: grants.email, name: grants.name, role: grants.role };
             const { error } = schema.validate(body);
             if (error) {
-                console.log(error);
                 ErrorResponseToaster({message: [error]});
                 logout({returnTo: window.location.origin,});
                 return;
             }
             // const token = await getAccessTokenSilently();
-            console.log("Let's check token:", grants);
             grants.token = grants.token ? grants.token : await getAccessTokenSilently();
             const options = {
                 headers: {
@@ -80,27 +77,31 @@ export const GrantsContextProvider = ({ children }) => {
             }
             if (grants && !!grants.role) {
                 //no sense to reauth right now, thus role known, anyway , if so, server will not proof..if so
-                console.log("Grants was already known: ", grants.role);
                 return;
             }
             const response = await fetch(
-                `http://localhost:5000/api/user/${grants.sub}`,
+                `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/user/${grants.sub}`,
                 options
             );
             const responseData = await response.json();
-            console.log('!!!!!!!', responseData);
             switch (response.status) {
                 case 200:
+                    grants.first_name ||= responseData.first_name || grants.given_name;
+                    grants.last_name ||= responseData.last_name || grants.family_name;
                     grants.hash = responseData.hash ? responseData.hash : null;
                     grants.role = responseData.role ? responseData.role : null;
+                    grants.id = responseData.id;
                     // grants.role = 'admin';
-                    const boss = ['admin', 'moder'].find(v => v === grants?.role);
                     setGrantsState(grants);
                     break;
                 case 400:
                     ErrorResponseToaster(responseData);
                     break;
                 case 401:
+                    logout();
+                    ErrorResponseToaster(responseData);
+                    break;
+                case 404:
                     logout();
                     ErrorResponseToaster(responseData);
                     break;

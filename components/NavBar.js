@@ -16,6 +16,7 @@ import { useGrantsContext } from "../context/auth.context";
 import MenuLink from "./MenuLink";
 import LoginButton from './LoginButton';
 import DashboardAdmin from './DashboardAdmin';
+import { avatarNavBarSize } from '../startup/theming';
 
 const NavLink = ({ children }) => (
     <Link
@@ -51,7 +52,7 @@ const NavBar = () => {
             >
                 <DashboardAdmin />
                 <HStack spacing={8} alignItems={'center'}>
-                    <Text>Logo</Text>
+                    <Box>Logo</Box>
                     <HStack
                         as={'nav'}
                         spacing={4}
@@ -78,7 +79,7 @@ const NavBar = () => {
                             <MenuList>
                                 <MenuItem>
                                     <Avatar
-                                        size={'sm'}
+                                        size={avatarNavBarSize}
                                         src={grants.picture}
                                         mr="12px"
                                     />
@@ -108,7 +109,7 @@ const NavBar = () => {
                         <LoginButton
                             colorScheme="blue"
                             size='lg'
-                            href="/api/auth/login"
+                            // href="/api/auth/login"
                             className="btn btn-primary btn-block"
                             disabled={grantsLoading}
                             tabIndex={0}

@@ -83,7 +83,6 @@ const Review = () => {
     };
 
     const openProfileGBL = () => {
-        console.log("Profile");
         return false;
     }
 
@@ -130,16 +129,14 @@ const Review = () => {
             body: JSON.stringify(block),
             method: 'POST',
         }
-        console.log(block);
         const response = await fetch(
-            `http://localhost:5000/api/block`,
+            `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/block`,
             options
         );
         switch (response.status) {
             case '200':
             case '201':
                 const responseData = await response.json();
-                console.log("CAME BACK:", responseData);
                 return responseData;
             case '500':
                 toast({
@@ -151,7 +148,6 @@ const Review = () => {
             default:
                 break;
         }
-        console.log(response.status);
         // const obj = adjustBlock(responseData)
         // model = model.concat(obj);
         // setModel(model);
@@ -173,7 +169,6 @@ const Review = () => {
         const back = await addComment(obj);
         const block = adjustLoadedBlock(back);
         setModel(model.concat(block));
-        console.log("MODEL:", model);
         setText("");
         setLabel("");
     }
@@ -222,7 +217,7 @@ const Review = () => {
     return (
         <Box w='100%' m={[2, 0, 2, 0]} fontSize={['md', 'md', 'lg', 'lg', 'lg']}>
             <Flex direction='row' alignItems='center' m={['3']}>
-                <Text>Have something to write?</Text>
+                <Box>Have something to write?</Box>
                 <Spacer />
                 <Button colorScheme='blue' size={['lg', 'md']} fontSize={['xl', 'xl', 'xl', 'xl', 'lg']} onClick={menu.reviewForm.isOpen ? menu.reviewForm.onClose : menu.reviewForm.onOpen}>Publish review</Button>
             </Flex>
@@ -247,7 +242,7 @@ const Review = () => {
                                 <form onSubmit={onSubmit}>
                                     <Stack align='left'>
                                         <HStack>
-                                            <Text><nobr>GBL Number</nobr></Text>
+                                            <Box><nobr>GBL Number</nobr></Box>
                                             <Input fontSize={rewiewDrawerFontSize} h='2em' bg='orange.50' variant='outline' value={gbl} onChange={handleChangeGbl} placeholder={gblPlaceholder} />
                                         </HStack>
                                         <Select fontSize='xl' size='lg' placeholder='More details about experience'>
@@ -274,7 +269,7 @@ const Review = () => {
                                         />
                                         <HStack>
                                             <Box p={0} w={datesLabelSize} fontSize={rewiewDrawerFontSize}>
-                                                <Text>Requested pickup</Text>
+                                                <Box>Requested pickup</Box>
                                             </Box>
                                             <Box p={0} w={datesPickerSize} fontSize={rewiewDrawerFontSize}>
                                                 <SingleDatepicker
@@ -294,7 +289,7 @@ const Review = () => {
                                         {/* </Box> */}
                                         <HStack>
                                             <Box p={0} w={datesLabelSize} fontSize={rewiewDrawerFontSize}>
-                                                <Text>Actual pickup</Text>
+                                                <Box>Actual pickup</Box>
                                             </Box>
                                             <Box p={0} w={datesPickerSize} fontSize={rewiewDrawerFontSize}>
                                                 <SingleDatepicker
@@ -313,7 +308,7 @@ const Review = () => {
                                         </HStack>
                                         <HStack>
                                             <Box p={0} w={datesLabelSize} fontSize={rewiewDrawerFontSize}>
-                                                <Text>Requested delivery</Text>
+                                                <Box>Requested delivery</Box>
                                             </Box>
                                             <Box p={0} w={datesPickerSize} fontSize={rewiewDrawerFontSize}>
                                                 <SingleDatepicker
@@ -332,7 +327,7 @@ const Review = () => {
                                         </HStack>
                                         <HStack>
                                             <Box p={0} w={datesLabelSize} fontSize={rewiewDrawerFontSize}>
-                                                <Text>Actual delivery</Text>
+                                                <Box>Actual delivery</Box>
                                             </Box>
                                             <Box p={0} w={datesPickerSize} fontSize={rewiewDrawerFontSize}>
                                                 <SingleDatepicker
