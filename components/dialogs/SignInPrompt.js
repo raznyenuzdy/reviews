@@ -13,6 +13,7 @@ import {
     Box,
     Textarea,
     HStack,
+    Image,
 } from '@chakra-ui/react';
 import CommentHeader from '../block/CommentHeader';
 import { useDisclosure } from '@chakra-ui/react';
@@ -52,7 +53,7 @@ const SignInPrompt = () => {
                 <ModalCloseButton size='lg' />
                 <ModalBody p='0' pl={['1', '1', '1', '4', '6']} pr={'4'} mt={4}>
                     <HStack>
-                    <Link href='/app/auth/login'><img src='/images/google.svg' /><Box fontSize={commentHeaderFontSize}>Log in with Google</Box></Link>
+                    <Link href='/app/auth/login'><Image src='/images/google.svg' alt='google'/><Box fontSize={commentHeaderFontSize}>Log in with Google</Box></Link>
                     <Box borderLeft='1px solid grey' pl='2'>Login with username and password</Box>
                     </HStack>
                 </ModalBody>

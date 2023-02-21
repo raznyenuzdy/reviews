@@ -1,42 +1,31 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Central from './Central';
 import CentralFooter from './CentralFooter';
 import { Container, useToast } from '@chakra-ui/react';
 import NavBar from './NavBar';
 import Error from './Error';
-import {maxWidthLayout, paddingLayout} from '../startup/theming';
+import { useUser } from '@auth0/nextjs-auth0/client';
+import { maxWidthLayout, paddingLayout } from '../startup/theming';
+import { useRouter } from 'next/router';
 import inAppEvent from '../startup/events';
 
-function Layout({ children }) {
+function Layout({ children, logout }) {
 
-    // const toast = useToast();
+    const router = useRouter();
 
-    // const handleError = (error) => {
-    //     const status = error.status || error.statusCode || '';
-    //     const title = error.statusText || 'Error';
-    //     const description = typeof error === 'string' ? error : error.message || dafaultError;
-    //     console.log("TOASTER:", error, {
-    //         title,
-    //         description,
-    //         status,
-    //         duration: 9000,
-    //         isClosable: true,
-    //       });
-    //     toast({
-    //         title,
-    //         description,
-    //         status,
-    //         duration: 9000,
-    //         isClosable: true,
-    //       })
-    // }
+    const { user } = useUser();
 
-    // inAppEvent.clear('errorEvent');
-    // inAppEvent.on('errorEvent', handleError);
+    useEffect(() => {
+        if (user && logout) logOut();
+    })
+
+    const logOut = () => {
+        router.push('/api/auth/logout');
+    }
 
     return (
         <>
-        <Error />
+            <Error />
             <NavBar />
             <Container w='100%' maxW={maxWidthLayout} p={paddingLayout} >
                 {children}

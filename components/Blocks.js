@@ -1,64 +1,47 @@
-import { useState, useEffect, useRef } from "react";
-import { Avatar, Box, Center, Select, Skeleton, SkeletonCircle, SkeletonText, Wrap, NumberInput, NumberDecrementStepper, NumberInputStepper, NumberIncrementStepper, NumberInputField, WrapItem, Badge, Button, Container, Text, VStack, Stack, HStack, Flex, Spacer, Link } from '@chakra-ui/react';
-import BlockForm from "./block/BlockForm";
+import { useState } from "react";
+import { Box, Flex, Spacer, Link, Progress, Center } from '@chakra-ui/react';
 import Review from './comments/Review';
 import ReplyToComment from './dialogs/Reply';
 import CancelEditBlockAlert from './dialogs/CancelEditBlockAlert';
 import DeleteCommentAlert from './dialogs/DeleteCommentAlert';
 import ReplyToBlock from './dialogs/BlockReply';
 import Block from "./block/Block";
-import { useGrantsContext } from "../context/auth.context";
 import { useModelContext } from "../context/model.context";
 import { useMenuContext } from "../context/menu.context";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Config from '../startup/config';
-import { key, blockType } from '../utils/utils';
-import { getBlocks } from '../db/model2';
-import { adjustBlock } from '../db/model2';
+import { getBlocks } from '../db/model';
 import inAppEvent from '../startup/events';
+import {useGrantsContext} from "../context/auth.context";
+import Ad from "./comments/Ad";
+import BlockForm from "./block/BlockForm";
+import AddBlockForm from "./block/addBlockFiorm";
 
-const Blocks = () => {
+const Blocks = ({paging}) => {
+
     const [hasMore, setHasMore] = useState(true);
+
     const { state } = useModelContext();
-    const { grants } = useGrantsContext();
+
     const { menu } = useMenuContext();
 
-    const reOrder = () => {
-        // state.model.sort((a, b) => {a.position > b.position});
-        // state.model = {...state.model};
-    }
+    const { boss } = useGrantsContext();
 
-    inAppEvent.on('reorder', reOrder);
-
-    const saveBlock = async () => {
-        grants.token = grants.token ? grants.token : await getAccessTokenSilently();
-        const options = {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${grants.token}`,
-                'Content-type': 'application/json'
-            },
-            body: JSON.stringify({ title: 'Fetch POST Request Example' }),
-        }
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/block`,
-            options
-        );
-        const responseData = await response.json();
-        // const block = adjustBlock(obj, grants)
-        model = model.concat(responseData);
-        // setModel(model);
-    }
-
-    const review = () => {
-
+    if (!state?.model) {
+        setTimeout(() => {//костыль
+            inAppEvent.emit('errorMessage', "Service temporarily not provide information!")
+        }, 0)
     }
 
     const getMorePost = async () => {
-        const loaded = await getBlocks(state.page);
-        if (loaded) {
-            state.setPage(++state.page);
-            state.model = state.model.concat(loaded);
+        if (!state.scrollable) return;
+        const {model} = await getBlocks(state.blocks, undefined, menu.showDeleted);
+        if (model) {
+            state.blocks += model.length;
+            state.setBlocks(state.blocks);
+            state.scrollable = true;
+            state.setScrollable(state.scrollable);
+            state.model = state.model.concat(model);
             state.setModel(state.model);
             if (state.model.length > Config.blocksMaxThreshold)
                 setHasMore(false)
@@ -66,11 +49,17 @@ const Blocks = () => {
     };
 
     const filter = () => {
-
         return true
     }
 
-    return (
+    const draw = state.model?.filter(filter).map((block) => (!block.parentId && (!block.deleted || menu.showDeleted) ?
+        <Block
+            key={'block' + block.id}
+            id={block.id}
+        /> : null
+    ))
+
+    return (!state?.model ? null :
         <>
             <Review submitLabel="Write" />
             <ReplyToBlock />
@@ -81,19 +70,12 @@ const Blocks = () => {
                 dataLength={state.model.length}
                 next={getMorePost}
                 hasMore={hasMore}
-                loader={<h3>Loading...</h3>}
-                endMessage={<h4>Nothing more to show</h4>}
+                scrollThreshold={0.4}
+                loader={state.scrollable ? <Progress size='xs' isIndeterminate /> : null}
+                endMessage={<Center><h4>Nothing more to show</h4></Center>}
             >
-                {state.model.filter(filter).map((block) => (!block.parentId && (!block.deleted || menu.showDeleted) ?
-                    <Block
-                        key={'block' + block.id}
-                        id={block.id}
-                        // block={block}
-                    /> : null
-                ))}
-                <Flex direction='row'>
-                    <Link>Prev</Link><Spacer/><Box>Page {state.page}</Box><Spacer/><Link>Next</Link>
-                </Flex>
+                <AddBlockForm />
+                { draw }
             </InfiniteScroll>
         </>
     )

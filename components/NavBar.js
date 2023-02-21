@@ -1,22 +1,18 @@
 import {
-    Box, Button, Flex, Avatar, HStack, Link, Switch, FormControl,
-    FormLabel, IconButton, Menu, MenuButton, MenuList, MenuItem,
-    Skeleton, SkeletonCircle, SkeletonText, Text,
-    MenuDivider, useDisclosure, useColorModeValue, Stack,
+    Box, Button, Flex, Avatar, HStack, Tooltip, Menu, MenuButton,
+    MenuList, MenuItem, SkeletonCircle, Link, useDisclosure,
+    useColorModeValue, Stack,
 } from '@chakra-ui/react';
-import { HamburgerIcon, CloseIcon } from '@chakra-ui/icons';
-const Links = [];//['Dashboard', 'Projects', 'Team'];
+import * as NextLink from 'next/link'
 import React, { useState, useContext } from 'react';
-import { useUser } from '@auth0/nextjs-auth0';
-import { useAuth0 } from "@auth0/auth0-react";
+import { useUser } from '@auth0/nextjs-auth0/client';
 import AnchorLink from './AnchorLink';
-import AnchorLogoutButton from './AnchorButton';
-import ButtonLink from './ButtonLink';
 import { useGrantsContext } from "../context/auth.context";
-import MenuLink from "./MenuLink";
 import LoginButton from './LoginButton';
 import DashboardAdmin from './DashboardAdmin';
-import { avatarNavBarSize } from '../startup/theming';
+import { avatarNavBarSize, notApprovedColor } from '../startup/theming';
+import { nameString } from '../utils/utils';
+const Links = [];//['Dashboard', 'Projects', 'Team'];
 
 const NavLink = ({ children }) => (
     <Link
@@ -33,26 +29,39 @@ const NavLink = ({ children }) => (
 );
 
 const NavBar = () => {
-    const { isAuthenticated, user, isLoading, error } = useAuth0();
+
+    const { grants } = useGrantsContext();
+
+    console.log("GRAGRA", grants);
+
     const [isOpened, setIsOpened] = useState(false);
-    // const { user, error, isLoading } = useUser();
-    const { grants, grantsLoading } = useGrantsContext();
+
+    const { user, error, isLoading } = useUser();
+
+    const userName = nameString(grants?.user_model, grants);
+
     const { isOpen, onOpen, onClose } = useDisclosure();
+
     const btnRef = React.useRef();
 
     const toggle = () => setIsOpened(!isOpen);
     return (
         <Flex w='100%'
-        bg={useColorModeValue('gray.100', 'gray.900')} px={[1,2,4]}>
-            <Flex 
-            w='100%'
-            justifyContent={'space-between'}
-            fontSize={['lg','lg','lg','xl','2xl']}
-            h={'16'}
+            bg={useColorModeValue('gray.100', 'gray.900')} px={[1, 2, 4]}>
+            <Flex
+                w='100%'
+                justifyContent={'space-between'}
+                fontSize={['lg', 'lg', 'lg', 'xl', '2xl']}
+                h={'16'}
             >
                 <DashboardAdmin />
                 <HStack spacing={8} alignItems={'center'}>
-                    <Box>Logo</Box>
+                    <AnchorLink
+                        href="/"
+                        className="btn btn-link p-0"
+                        testId="navbar-logout-mobile">
+                        Home
+                    </AnchorLink>
                     <HStack
                         as={'nav'}
                         spacing={4}
@@ -62,62 +71,63 @@ const NavBar = () => {
                         ))}
                     </HStack>
                 </HStack>
-                {(isAuthenticated && grants && !grantsLoading) ?
+                {user ?
                     <Flex alignItems={'center'}>
                         <Menu>
-                            <MenuButton
-                                as={Button}
-                                rounded={'full'}
-                                variant={'link'}
-                                cursor={'pointer'}
-                                minW={0}>
-                                <Avatar
-                                    size={'md'}
-                                    src={grants.picture}
-                                />
-                            </MenuButton>
+                            <Tooltip label={userName} bg={notApprovedColor}>
+                                <MenuButton
+                                    as={Button}
+                                    rounded={'full'}
+                                    variant={'link'}
+                                    cursor={'pointer'}
+                                    minW={0}>
+                                    <Avatar
+                                        size={'md'}
+                                        name={'userName'}
+                                        src={user?.picture}
+                                    />
+                                </MenuButton>
+                            </Tooltip>
                             <MenuList>
                                 <MenuItem>
-                                    <Avatar
-                                        size={avatarNavBarSize}
-                                        src={grants.picture}
-                                        mr="12px"
-                                    />
+                                    <Tooltip label={userName} bg={notApprovedColor}>
+                                        <Avatar
+                                            size={avatarNavBarSize}
+                                            src={user?.picture}
+                                            mr="12px"
+                                        />
+                                    </Tooltip>
+                                    <AnchorLink
+                                        href="/profile"
+                                        className="btn btn-link p-0"
+                                        testId="navbar-logout-mobile">
+                                        {user?.name}
+                                    </AnchorLink>
+                                </MenuItem>
+                                <MenuItem>
                                     <AnchorLink
                                         href="/api/auth/logout"
                                         className="btn btn-link p-0"
                                         testId="navbar-logout-mobile">
-                                        {grants.name}
-                                    </AnchorLink>
-                                </MenuItem>
-                                <MenuItem>
-                                    <AnchorLogoutButton
-                                        href="/api/auth/logout"
-                                        className="btn btn-link p-0"
-                                        icon="power-off"
-                                        mr="12px"
-                                        testId="navbar-logout-mobile">
                                         Log out
-                                    </AnchorLogoutButton>
+                                    </AnchorLink>
                                 </MenuItem>
                             </MenuList>
                         </Menu>
-                    </Flex> : null
-                }
-                {((!isAuthenticated && isLoading) || !user) ?
+                    </Flex> :
                     <Flex alignItems={'center'}>
-                        <LoginButton
-                            colorScheme="blue"
-                            size='lg'
-                            // href="/api/auth/login"
-                            className="btn btn-primary btn-block"
-                            disabled={grantsLoading}
-                            tabIndex={0}
-                            testId="navbar-login-mobile">
-                            Log in
-                        </LoginButton>
-                    </Flex> : null
-                }
+                        {isLoading ?
+                            <SkeletonCircle size='1' /> :
+                            <LoginButton
+                                colorScheme="blue"
+                                size='lg'
+                                href="/api/auth/login"
+                                className="btn btn-primary btn-block"
+                                tabIndex={0}
+                                testId="navbar-login-mobile">
+                                Log in
+                            </LoginButton>}
+                    </Flex>}
             </Flex>
 
             {isOpen ? (

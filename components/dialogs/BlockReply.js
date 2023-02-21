@@ -13,15 +13,18 @@ import {
     Textarea,
 } from '@chakra-ui/react';
 import CommentHeader from '../block/CommentHeader';
+import LoginButton from '../LoginButton';
 import { useDisclosure } from '@chakra-ui/react';
 import { useMenuContext } from "../../context/menu.context";
 import { useGrantsContext } from "../../context/auth.context";
 import inAppEvent from '../../startup/events';
 import { replyTextareaFontSize, sizes, commentHeaderFontSize } from '../../startup/theming';
 import { key } from "../../utils/utils";
+import { useUser } from '@auth0/nextjs-auth0/client';
+import { httpApi } from "../../utils/http";
 
 const ReplyToBlock = () => {
-
+    const { user } = useUser();
     const { grants } = useGrantsContext();
     const { isOpen, onOpen, onClose } = useDisclosure()
     const [data, setData] = useState({});
@@ -69,34 +72,21 @@ const ReplyToBlock = () => {
 
     const postReplyBlock = async () => {
         try {
-            setDisable(true);
-            const reply = {
+            const body = {
                 ref_block: data.id,
-                ref_parent: null,
                 text
             };
-            const options = {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${grants.token}`,
-                    'Content-type': 'application/json',
-                    'key': _key
-                },
-                body: JSON.stringify(reply),
-            }
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/comment`,
-                options
-            );
-            const responseData = await response.json();
+            const headers = {'key': _key};
+            const response = await httpApi('POST', '/api/comment', headers, body);
+            if (!response) {onClose(); return;}
             if (response.status !== 201) {
-                inAppEvent.emit('errorEvent', [response.status, responseData]);
+                inAppEvent.emit('errorEvent', [response.status, response.responseData]);
+                onClose();
                 return;
             }
             onClose();
-            inAppEvent.emit('addCommentEvent_' + data.id + ':', responseData);
+            inAppEvent.emit('addCommentEvent_' + data.id + ':', response.responseData);
         } catch (error) {
-            console.log(error);
             inAppEvent.emit('errorEvent', [500, error]);
         }
     }
@@ -110,10 +100,10 @@ const ReplyToBlock = () => {
                 </ModalHeader>
                 <ModalCloseButton size='lg' />
                 <ModalBody p='0' pl={['1', '1', '1', '4', '6']} pr={'4'} mt={4}>
-                    <CommentHeader isreply>
-                        <Box fontSize={commentHeaderFontSize}>{data.label}</Box>
+                    <CommentHeader isreply inreply>
+                        <Box pt='4' fontSize={commentHeaderFontSize}>{data.label}</Box>
                     </CommentHeader>
-                    <CommentHeader comment={data}>
+                    <CommentHeader comment={data} inreply>
                         <Textarea
                             p={['5px', '', '', '', '', '']}
                             // m={0}
@@ -130,6 +120,7 @@ const ReplyToBlock = () => {
                 </ModalBody>
                 <ModalFooter>
                     <ButtonGroup variant='solid' spacing='6'>
+                        {user ?
                         <Button
                             // colorScheme='blue'
                             variant='solid'
@@ -138,8 +129,17 @@ const ReplyToBlock = () => {
                             type='submit'
                             onClick={postReplyBlock}
                             disabled={!canSave()}>
-                            Write review
-                        </Button>
+                            Write review{grants?.role}
+                        </Button> :
+                            <LoginButton
+                            colorScheme="blue"
+                            size='lg'
+                            href="/api/auth/login"
+                            className="btn btn-primary btn-block"
+                            tabIndex={0}
+                            testId="navbar-login-mobile">
+                            Log in to write review
+                        </LoginButton>}
                     </ButtonGroup>
                 </ModalFooter>
             </ModalContent>

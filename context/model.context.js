@@ -1,28 +1,15 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { getBlocks } from '../db/model2';
 import { useGrantsContext } from './auth.context';
 
-export const ModelContext = createContext([]);
+export const ModelContext = createContext();
 
-export const ModelContextProvider = ({ children, _model }) => {
+export const ModelContextProvider = ({ children, _model, scroll = true }) => {
     const [page, setPage] = useState(1);
+    const [blocks, setBlocks] = useState(_model?.length || 0); //shown blocks at last scrolling
+    const [scrollable, setScrollable] = useState(scroll);
     const [model, setModel] = useState(_model);
-    const [modelLoading] = useState(false);
-    const {grants, isLoading} = useGrantsContext();
-    const [state, setState] = useState({ model, setModel, modelLoading, page, setPage });
+    const [state, setState] = useState({ model, setModel, page, scrollable, setScrollable, setPage, blocks, setBlocks });
 
-/*
-    useEffect(() => {
-        if (isLoading) return;
-        const fetchData = async () => {
-            const model = await getBlocks(grants, page);
-            setModel(model);
-            state.model = model;
-            setState(state);
-        }
-        fetchData().catch(console.error);
-    }, [page, isLoading, grants]);
-*/
     return (
         <ModelContext.Provider value={{state, setState}}>
             {children}

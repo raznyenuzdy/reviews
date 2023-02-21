@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useDisclosure, Button } from '@chakra-ui/react';
 import {
     AlertDialog,
@@ -8,30 +8,40 @@ import {
     AlertDialogContent,
     AlertDialogOverlay,
 } from '@chakra-ui/react';
-import { useMenuContext } from "../../context/menu.context";
 import inAppEvent from "../../startup/events";
 
 const CancelEditBlockAlert = () => {
-    const { menu, setMenu } = useMenuContext();
+
     const { isOpen, onOpen, onClose } = useDisclosure();
+
+    const [eventNameCancel, setEventNameCancel] = useState('');
+
+    const [eventNameEdit, setEventNameEdit] = useState('');
+
     const cancelRef = useRef();
 
-    // inAppEvent.clear('cancelEditBlock');
     inAppEvent.on('cancelEditBlock', () => {
+        setEventNameCancel('closeBlockTextarea');
+        setEventNameEdit('focusToBlockTextarea');
+        onOpen();
+    });
+
+    inAppEvent.on('cancelEditComment', () => {
+        setEventNameCancel('closeCommentTextarea');
+        setEventNameEdit('focusToCommentTextarea');
         onOpen();
     });
 
     const onCancel = () => {
         onClose();
         setTimeout(() => {
-            // menu.setEditing(menu.editing = null);
-            inAppEvent.emit('closeBlockTextarea');
+            inAppEvent.emit(eventNameCancel);
         }, 0);
     }
 
     const doEdit = () => {
         onClose();
-        inAppEvent.emit('focusToBlockTextarea');
+        inAppEvent.emit(eventNameEdit);
     }
 
     return (

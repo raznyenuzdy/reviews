@@ -1,8 +1,5 @@
-import {handleAuth, getAccessToken, getSession, handleCallback, handleLogin} from '@auth0/nextjs-auth0';
+import { handleAuth, handleLogin, handleProfile, handleCallback } from '@auth0/nextjs-auth0';
 import Joi from "joi";
-
-const ErrorResponseToaster = (responseData) => {
-}
 
 const AuthRole = async (session) => {
     try {
@@ -38,7 +35,6 @@ const AuthRole = async (session) => {
             options
         );
         const responseData = await response.json();
-        console.log("Outnah", response.status, responseData);
         switch (response.status) {
             case 200:
                 session.user.first_name ||= responseData.first_name || session.user.given_name;
@@ -76,50 +72,29 @@ const afterRefetch = async (req, res, session) => {
     return new Promise((resolve) => resolve(session));
 }
 
-const getLoginState = (req, loginOptions) => {
-    return { basket_id: getBasketId(req) };
-};
-
-export default handleAuth({/*
+export default handleAuth({
     callback: async (req, res) => {
         try {
-            // let accessToken = null;
-            // try {
-            //     accessToken = await getAccessToken(req, res);
-            // } catch (error) {
-            //     console.log('ERROR:auth0:handleAuth1:', error);
-            // }
-            // await handleCallback(req, res, { afterCallback });
-            // try {
-            //     const session = getSession(req, res);
-            // } catch (error) {
-            //     console.log('ERROR:auth0:handleAuth1:', error);
-            // }
-            // return accessToken ? await handleCallback(req, res, { afterCallback }) :
-            // await handleCallback(req, res);
+            await handleCallback(req, res, { afterCallback });
         } catch (error) {
-            console.log("ERROR:auth0:handleAuth:catch2:", error);
             res.status(error.status || 500).end();
+        }
+    },
+    profile: async (req, res) => {
+        try {
+            await handleProfile(req, res, { afterRefetch, refetch: true });
+        } catch (error) {
+            console.error(error);
         }
     },
     login: async (req, res) => {
         try {
             await handleLogin(req, res, {
                 // Get the connection name from the Auth0 Dashboard
-                authorizationParams: {
-                    connection: null, //'github'
-                    connection_scope: null,//'openid profile email offline_access', //'public_repo read:user'
-                    invitation: "",//
-                    screen_hint: "",
-                    // scope: 'openid profile email offline_access',
-                    // useRefreshTokens: true,
-                    // audience: 'http://localhost:3000/'
-                },
-                //getLoginState,//Generate a unique state value for use during login transactions.
-                returnTo: "" //URL to return to after login. Overrides the default in BaseConfig.baseURL.
+                authorizationParams: { scope: 'openid profile email', audience: 'http://localhost:3000/'}
             });
         } catch (error) {
             console.error(error);
         }
-    }*/
+    }
 })

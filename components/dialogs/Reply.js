@@ -20,9 +20,10 @@ import { useGrantsContext } from "../../context/auth.context";
 import inAppEvent from '../../startup/events';
 import { replyTextareaFontSize, sizes, commentHeaderFontSize } from '../../startup/theming';
 import { key } from "../../utils/utils";
+import { httpApi } from "../../utils/http";
 
 const ReplyToComment = () => {
-    const { grants, grantsLoading } = useGrantsContext();
+    const { grants } = useGrantsContext();
     const { isOpen, onOpen, onClose } = useDisclosure()
     const [data, setData] = useState({});
     const [_key, setKey] = useState();
@@ -69,8 +70,29 @@ const ReplyToComment = () => {
 
     const postReplyComment = async () => {
         try {
+            const body = {
+                ref_block: data.ref_block,
+                ref_parent: data.id,
+                text
+            };
+            const headers = {'key': _key};
+            const response = await httpApi('POST', '/api/comment', headers, body);
+            if (!response) {onClose(); return;}
+            if (response.status !== 201) {
+                inAppEvent.emit('errorEvent', [response.status, response.responseData]);
+                onClose();
+                return;
+            }
+            onClose();
+            inAppEvent.emit('addCommentEvent' + data.ref_block + ':' + data.id, response.responseData);
+        } catch (error) {
+            inAppEvent.emit('errorEvent', [500, error]);
+        }
+    };
+
+    const _postReplyComment = async () => {
+        try {
             setDisable(true);
-            grants.token = grants.token ? grants.token : await getAccessTokenSilently();
             const reply = {
                 ref_block: data.ref_block,
                 ref_parent: data.id,
@@ -109,10 +131,10 @@ const ReplyToComment = () => {
                 </ModalHeader>
                 <ModalCloseButton size='lg' />
                 <ModalBody p='0' pl={['1', '1', '1', '4', '6']} pr={'4'} mt={4}>
-                    <CommentHeader isreply='true'>
+                    <CommentHeader isreply inreply>
                         <Box fontSize={commentHeaderFontSize}>{data.text}</Box>
                     </CommentHeader>
-                    <CommentHeader comment={data}>
+                    <CommentHeader comment={data} inreply>
                         <Textarea
                             p={['5px', '', '', '', '', '']}
                             // m={0}

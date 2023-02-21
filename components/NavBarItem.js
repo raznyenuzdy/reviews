@@ -2,6 +2,7 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import { library, dom } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { SettingsIcon, ArrowUpIcon } from '@chakra-ui/icons';
 import { Box, Stack } from '@chakra-ui/react';
 import { navbarFontSize } from '../startup/theming';
 // library.add(faCheckSquare, faCoffee);
@@ -14,7 +15,7 @@ const NavBarItem = ({ children, href, className, icon, tabIndex, testId, mr }) =
 
     return (
         <Stack direction={['row']} alignItems="center">
-            {icon && <Box fontSize={['2xl']}><FontAwesomeIcon icon={icon} /></Box>}
+            {icon && <SettingsIcon mt='2px' boxSize={8} color='green.600' />}
             <Box
             className={router.asPath === href ? activeClasses : className}
             tabIndex={tabIndex}

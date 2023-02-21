@@ -1,0 +1,18 @@
+{
+    "id": 1,
+    "user_id": "google-oauth2|100107831717703206072",
+    "email": "raznyenuzdy@gmail.com",
+    "email_verified": "true",
+    "name": "Різні Потреби",
+    "nickname": "raznyenuzdy",
+    "picture": "https://lh3.googleusercontent.com/a/ALm5wu1vUGERYpBhOAWJA-AND_wVfzixzWkEccQX8fHv=s96-c",
+    "role": "admin",
+    "created_at": "2022-09-06T10:39:42.582Z",
+    "updated_at": "2022-11-23T16:40:47.282Z",
+    "last_password_reset": null,
+    "last_ip": "5.90.37.158",
+    "last_login": "2022-12-20T11:29:54.555Z",
+    "logins_count": "21",
+    "createdAt": "2022-11-23T17:17:46.247Z",
+    "updatedAt": "2022-12-20T11:29:57.067Z"
+}

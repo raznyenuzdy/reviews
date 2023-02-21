@@ -1,75 +1,71 @@
 import React from 'react';
+import Head from 'next/head';
 import TimeLine from '../components/TimeLine';
-import { getBlocks } from '../db/model2';
-import { Box, Flex, Center, ChakraProvider } from '@chakra-ui/react'
+import {getBlocks} from '../db/model';
 import Layout from '../components/Layout';
-import { extendTheme } from '@chakra-ui/react'
-import initFontAwesome from '../utils/initFontAwesome';
-import { GrantsContextProvider } from '../context/auth.context';
-import { ModelContextProvider } from '../context/model.context';
-import { MenuContextProvider } from '../context/menu.context';
-import Auth0ProviderWithHistory from './api/auth/authC';
-import SignInPrompt from '../components/dialogs/SignInPrompt';
+import {GrantsContextProvider} from '../context/auth.context';
+import {ModelContextProvider} from '../context/model.context';
+import {MenuContextProvider} from '../context/menu.context';
+import {getSession, getAccessToken} from '@auth0/nextjs-auth0';
+import config from '../startup/config';
+import {useUser} from "@auth0/nextjs-auth0/client";
+import theme, {themeConfig} from "../startup/theming";
+import {ColorModeScript, DarkMode, useColorMode} from "@chakra-ui/react";
 
 export async function getServerSideProps(context) {
-    const model = await getBlocks(0);
-    return {
-        props: {model}, // will be passed to the page component as props
+    try {
+        // let accessToken = null;
+        // let session = null;
+        // try {
+            // accessToken = await getAccessToken(context.req, context.res, {
+            //     refresh: true,
+                // scopes: ['openid profile email offline_access'],
+                // authorizationParams: {
+                //     response_type: 'code',
+                //     storeAccessToken: true,
+                //     storeRefreshToken: true,
+                    // audience: 'https://api/',
+                //     scope: 'openid profile email offline_access',
+                // },
+            // });
+            // if (accessToken) {
+            //     session = await getSession(context.req, {});
+            // }
+        // } catch (error) {
+        //     console.log('ERROR:index:getServerSideProps:catch:', error);
+        // }
+        // const session = {};
+        const {model, prevPageData, numPrevPage} = await getBlocks();
+        return {
+            props: {model, prevPageData, numPrevPage, user: null},//session?.user || null},//, logout: !session}, // will be passed to the page component as props
+            // props: {model, prevPageData, numPrevPage}, // will be passed to the page component as props
+        }
+    } catch (error) {
+        return {
+            props: {logout: true}, // will be passed to the page component as props
+        }
     }
 }
 
-// 2. Update the breakpoints as key-value pairs
-const breakpoints = {
-    '2xs': '320px',
-    'xs': '375px',
-    'sm': '425px',
-    'md': '768px',
-    'lg': '960px',
-    'xl': '1200px',
-    '2xl': '1536px',
-}
-
-const fontSize = {
-    '2xs': '1em',
-    'xs': '1em',
-    'sm': '1em',
-    'md': '1em',
-    'lg': '1em',
-    'xl': '1em',
-    '2xl': '1em',
-}
-
-const colors = {
-    brand: {
-        900: '#1a365d',
-        800: '#153e75',
-        700: '#2a69ac',
-    },
-}
-
-initFontAwesome();
-
-const theme = extendTheme({ colors, breakpoints, fontSize });
-
-// import { UserProvider } from '@auth0/nextjs-auth0';
-
-export default function Index({model}) {
+export default function Index({model, prevPageData, numPrevPage, logout}) {
+    // const { user, isLoading } = useUser();
+    let { colorMode, toggleColorMode } = useColorMode();
     return (
-        <Auth0ProviderWithHistory>
-            {/* <UserProvider> */}
-            <GrantsContextProvider>
-                <ModelContextProvider _model={model}>
-                    <MenuContextProvider>
-                        <ChakraProvider theme={theme}>
-                            <SignInPrompt/>
-                            <Layout>
-                            <TimeLine />
-                            </Layout>
-                        </ChakraProvider>
-                    </MenuContextProvider>
-                </ModelContextProvider>
-            </GrantsContextProvider>
-            {/* </UserProvider> */}
-        </Auth0ProviderWithHistory>
+        // isLoading ? null :
+        <GrantsContextProvider>
+            <ModelContextProvider _model={model}>
+                <MenuContextProvider>
+                    <Layout logout={logout}>
+                        <Head>
+                            <title>{config.metaIndex.title}</title>
+                            <meta name="description" content={config.metaIndex.description}/>
+                            <meta name="keywords" content={config.metaIndex.keywords}/>
+                            <meta name="robots" content={config.metaIndex.robots}/>
+                        </Head>
+                        <TimeLine paging={{prevPageData, numPrevPage}}/>
+                    </Layout>
+                </MenuContextProvider>
+            </ModelContextProvider>
+        </GrantsContextProvider>
     );
 }

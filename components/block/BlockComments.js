@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box } from '@chakra-ui/react';
+import {Box, useColorModeValue} from '@chakra-ui/react';
 import Config from '../../startup/config';
 import Comment from './Comment';
 import { useModelContext } from '../../context/model.context';
@@ -31,7 +31,7 @@ const BlockComments = ({
 
     function cutComment(data) {
         if (!Array.isArray(block.comments)) return;
-        const i = block.comments.findIndex(c => c.id === data.responseData);
+        const i = block.comments.findIndex(c => c.id == data.responseData.id);
         if (i < 0) return;
         block.comments.splice(i, 1);
         setBlock({...block});//мутация только так, мeтабельность splice походу относится только к содержимому массива
@@ -48,8 +48,10 @@ const BlockComments = ({
         return depth <= max ? step : 0
     }
 
+    const bc = useColorModeValue('#eee', '#444');
+
     const b = (depthMax = Config.commentsDepth) => {
-        return depth <= depthMax ? '1px solid #eee' : '0px'
+        return depth <= depthMax ? '1px solid ' + bc : '0px'
     }
 
     return (block.comments?.length <= 0 ? null :
@@ -63,7 +65,6 @@ const BlockComments = ({
                         depth={depth}
                         comment={comment}
                         cutcomment={cutComment}
-                        comments={block.comments.length}
                         setcommentscountparent={setcommentscountparent}
                     />
                 ))}

@@ -1,6 +1,4 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { getBlocks } from '../db/model2';
-import { useGrantsContext } from './auth.context';
 
 export const MenuContext = createContext();
 
@@ -10,6 +8,7 @@ export const MenuContextProvider = ({ children }) => {
     const [editing, setEditing] = useState(null);
     const [showReviewForm, setShowReviewForm] = useState(null);
     const [reviewForm, setReviewForm] = useState({});
+    const [adForm, setAdForm] = useState(false);
     const [replyForm, setReplyForm] = useState({});
     const [adminMenuComment, setAdminMenuComment] = useState(null);
     const [blockAccordionOpener, setBlockAccordionOpener] = useState([]);
@@ -27,17 +26,17 @@ export const MenuContextProvider = ({ children }) => {
         editing,
         setEditing,
         reviewForm,
+        setReviewForm,
         replyForm,
         setReplyForm,
         blockAccordionOpener,
         setBlockAccordionOpener,
         commentAccordionOpener,
         setCommentAccordionOpener,
-        setReviewForm
     });
 
     return (
-        <MenuContext.Provider value={{menu, setMenu}}>
+        <MenuContext.Provider value={{menu, setMenu, adForm, setAdForm}}>
             {children}
         </MenuContext.Provider>)
 }

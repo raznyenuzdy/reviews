@@ -1,4 +1,5 @@
 import config from "../startup/config";
+import {useColorModeValue} from "@chakra-ui/react";
 
 export const key = () => Math.random().toString(36).substring(2, 12);
 
@@ -29,8 +30,10 @@ export const userTypes = {
     }
 };
 
+export const nameString = (user_model) => buildName(user_model);
+
 //distance between dates < 5min
-export const stillActual = (obj, interval = 5) => {
+export const stillActual = (obj, interval = 15) => {
     const dt = obj.updatedAt ? new Date(obj.updatedAt).getTime() || 0 : new Date(obj.createdAt).getTime() || 0;
     const d1 = dt > new Date(obj.createdAt).getTime() || 0 ? dt : new Date(obj.createdAt).getTime() || 0;
     const d2 = new Date().getTime() || 0;
@@ -105,3 +108,30 @@ export const applyHumanTime = (dateStr) => {
     }
     return labelMoment;
 }
+
+//просто скопировал хороший код
+const closeDiscussionsBelowComment = (cmt = comment) => {
+    state.model.find(b => b.id === cmt.ref_block).comments.forEach(c => {
+        if (c.ref_parent === cmt.id) {
+            c.closed = comment.closed;
+            closeDiscussionsBelowComment(c);
+        }
+    })
+}
+
+export const invertColor = (color) => {
+    const [name, depth] = color.split(".");
+    return () => useColorModeValue(name + '.' + depth, name + '.' + (900 - parseInt(depth)).toString());
+}
+
+export const dayOrNight = () => {
+    const now = new Date();
+    const hour = now.getHours();
+    if (hour >= 6 && hour < 18) {
+        console.log('День');
+    } else {
+        console.log('Ночь');
+    }
+}
+
+export const boss = (user) => ['admin', 'moder'].find(v => v === user?.role);

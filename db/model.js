@@ -60,6 +60,7 @@ export const adjustLoadedBlock = (block) => {
         c.updatedAt = new Date(c.updatedAt).toString();
         c.createdAtStr = applyHumanTime(c.createdAt);
         c.modifiedAtStr = applyHumanTime(c.updatedAt);
+        c.user_model = typeof c.user_model === 'string' ? JSON.parse(c.user_model) : c.user_model;
     });
     return {
         id: block.id,
@@ -75,8 +76,9 @@ export const adjustLoadedBlock = (block) => {
         approved: block.approved,
         closed: block.closed,
         deleted: block.deleted,
+        position: block.position,
         comments: block.comments || [],
-        user_model: block.user_model,
+        user_model: typeof block.user_model === 'string' ? JSON.parse(block.user_model) : block.user_model,
     }
 }
 
@@ -108,17 +110,23 @@ const applyTypeBlock = (block) => {
     }
 }
 
-export const getBlocks = async (page = 0, grants) => {
-    let ret = [];
-    const blocks = await getBlocksDb(page, grants);
-    blocks.forEach((block) => {
-        const done = adjustLoadedBlock(block);
-        ret.push(done);
-    })
-    return ret;
+export const getBlocks = async (count = 0, session = {}, deleted) => {
+    try {
+        let ret = [];
+        const blocks = await getBlocksDb(count, session, deleted);
+        if (!blocks?.model) return ret;
+        blocks.model.forEach((block) => {
+            const done = adjustLoadedBlock(block);
+            ret.push(done);
+        })
+        blocks.model = ret;
+        return blocks;
+    } catch (error) {
+        throw error;
+    }
 }
 
-const getBlocksDb = async (page/*, grants*/) => {
+const getBlocksDb = async (page, session = {}, deleted = false) => {
     try {
         const options = {
             headers: {
@@ -126,16 +134,62 @@ const getBlocksDb = async (page/*, grants*/) => {
             },
             method: 'GET',
         }
-        // if (grants) header['Authorization'] = `Bearer ${grants.token}`;
+        if (deleted) {
+            options.headers.showdeleted = 'true';
+        }
+        if (session?.accessToken) options.headers['Authorization'] = `Bearer ${session.accessToken}`;
+        if (session?.idToken) options.headers['idToken'] = session.idToken;
+        console.log("URL:", `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/page/next/${page}`);
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/block/page/${page}`,
+            `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/page/next/${page}`,
             options
         );
         const resp = await response.json();
+        if (response.status !== 200) throw resp;
+        // const resp = await httpApi('GET', `/api/block/page/${page}`);
         //случай поломки базы, если шлет пустоту
-        const model = resp.filter(r => !!r);
-        return [].concat(model ?? []);
+        const model = resp?.model?.filter(r => !!r) || [];
+        resp.model = [].concat(model ?? []);
+        console.log();
+        console.log(resp);
+        return resp
     } catch (error) {
-        return []
+        throw error
+        // console.log('ERROR:model:getBlocksDb:', error);
+    }
+}
+
+export const getPages = async (page = 0) => {
+    let ret = [];
+    const data = await getPagesDb(page);
+    if (!data?.model || !data?.pageData) return ret;
+    data.model.forEach((block) => {
+        const done = adjustLoadedBlock(block);
+        ret.push(done);
+    })
+    delete data.model;
+    return {model:ret, pageData: data};
+}
+
+const getPagesDb = async (page) => {
+    try {
+        const options = {
+            headers: {
+                'Content-type': 'application/json'
+            },
+            method: 'GET',
+        }
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/page/${page}`,
+            options
+        );
+        const resp = await response.json();
+        if (!resp?.model || !resp?.pageData) return [];
+        //случай поломки базы, если шлет пустоту
+        resp.model = [].concat(resp.model.filter(r => !!r) ?? []);
+        return resp;
+    } catch (error) {
+        console.log('ERROR:model:getBlocksDb:', error);
+        return;
     }
 }

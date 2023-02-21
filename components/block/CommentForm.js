@@ -3,17 +3,15 @@ import { Box, Button, ButtonGroup, Input, Textarea, VStack } from '@chakra-ui/re
 import { blockFormButtonFontSize } from '../../startup/theming';
 import inter from '../../startup/inter';
 import inAppEvent from "../../startup/events";
-import {invertColor, key} from "../../utils/utils";
+import { key } from "../../utils/utils";
 import { adjustLoadedBlock } from '../../db/model';
 import { httpApi } from "../../utils/http";
 
-const BlockForm = ({ block, setisediting, setblock }) => {
+const CommentForm = ({ setisediting, comment, setcomment }) => {
 
     const [disabled, setDisabled] = useState(false);
 
-    const [text, setText] = useState(block.text);
-
-    const [label, setLabel] = useState(block.label);
+    const [text, setText] = useState(comment.text);
 
     const [once, setOnce] = useState(true);
 
@@ -23,17 +21,14 @@ const BlockForm = ({ block, setisediting, setblock }) => {
 
     const aref = useRef(null);
 
-    const iref = useRef(null);
-
     const onSubmit = (event) => {
         event.preventDefault();
         setText("");
-        setLabel("");
     };
 
     const handleCancel = () => {
         setDisabled(true);
-        inAppEvent.emit('cancelEditBlock', {});
+        inAppEvent.emit('cancelEditComment', {});
     }
 
     const setFocusOnTextArea = () => {
@@ -50,40 +45,32 @@ const BlockForm = ({ block, setisediting, setblock }) => {
         setText(e.target.value)
     }
 
-    const handleLabelChange = (e) => {
-        setTouched(true);
-        setLabel(e.target.value);
-    }
-
-    const disableSave = block.text.length <= 0 || !touched || (block.text === text && block.label === label);
+    const disableSave = comment.text.length <= 0 || !touched || comment.text === text;
 
     useEffect(() => {
-        const h = inter.get('height' + block.id);
+        const h = inter.get('heightc' + comment.id);
         if (h && parseInt(h)) {
             aref.current.style.height = (h - 14) + 'px';
         }
         if (once) setFocusOnTextArea();
         setOnce(false);
-    }, [once, block]);
+    }, [once, comment]);
 
     const save = async () => {
         try {
             setDisabled(true);
             const body = {
-                ...block,
-                type: block.type.type,
-                label,
+                ...comment,
                 text,
             };
-            console.log("UPDATE:", body);
             const headers = { 'key': _key };
-            const response = await httpApi('PUT', '/api/block', headers, body);
+            const response = await httpApi('PUT', '/api/comment', headers, body);
             if (response) {
                 if (response.status !== 200) {
                     inAppEvent.emit('errorEvent', [response.status, response.responseData]);
                 }
                 const data = adjustLoadedBlock(response.responseData);
-                setblock(data);
+                if (data) setcomment(data);
             }
             setisediting(false);
         } catch (error) {
@@ -91,32 +78,24 @@ const BlockForm = ({ block, setisediting, setblock }) => {
         }
     }
 
-    inAppEvent.clear('focusToBlockTextarea');
+    inAppEvent.clear('focusToCommentTextarea');
 
-    inAppEvent.on('focusToBlockTextarea', unFreez);
+    inAppEvent.on('focusToCommentTextarea', unFreez);
 
-    inAppEvent.clear('closeBlockTextarea');
+    inAppEvent.clear('closeCommentTextarea');
 
-    inAppEvent.on('closeBlockTextarea', () => setisediting(false));
+    inAppEvent.on('closeCommentTextarea', () => setisediting(false));
 
     return (
         <Box p='0' w='100%'>
             <form onSubmit={onSubmit}>
                 <VStack p='2' align='left' w='100%'>
-                    <Box>
-                        <Input
-                            disabled={disabled}
-                            ref={iref}
-                            bg={() => invertColor('orange.50')}
-                            w='100%'
-                            value={label}
-                            onChange={handleLabelChange} />
-                    </Box>
                     <Textarea
                         p='0.2em'
                         m={0}
-                        bg={() => invertColor('orange.50')}
+                        bg='orange.50'
                         disabled={disabled}
+                        w='100%'
                         ref={aref}
                         fontSize='md'
                         className="comment-form-textarea"
@@ -141,4 +120,4 @@ const BlockForm = ({ block, setisediting, setblock }) => {
     );
 };
 
-export default BlockForm;
+export default CommentForm;

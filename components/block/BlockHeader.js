@@ -1,15 +1,19 @@
 import {
-    Avatar, Box, Container, Flex, HStack, Spacer, Stack, Text, Center
+    Avatar, Box, Container, Flex, HStack, Spacer, Stack, Tooltip, Center, useColorModeValue, IconButton, useColorMode
 } from '@chakra-ui/react';
-import { useEffect, useState, useCallback } from 'react';
-import { useGrantsContext } from "../../context/auth.context";
-import { HamburgerIcon } from '@chakra-ui/icons';
-import { buildName, applyHumanTime } from '../../utils/utils';
+import {useEffect, useState, useCallback} from 'react';
+// import {useGrantsContext} from "../../context/auth.context";
+import {HamburgerIcon} from '@chakra-ui/icons';
+import {buildName, applyHumanTime, invertColor, boss} from '../../utils/utils';
 import BlockAdminPanel from './BlockAdminPanel';
-import { avatarBlockHeader, blockHeaderFontSize, blockTimerFontSize } from '../../startup/theming';
+import {avatarBlockHeader, blockHeaderFontSize, blockTimerFontSize, notApprovedColor} from '../../startup/theming';
 import Config from '../../startup/config';
+import {useUser} from "@auth0/nextjs-auth0/client";
+import {useGrantsContext} from "../../context/auth.context";
 
-const BlockHeader = ({ block, admin }) => {
+const BlockHeader = ({block, admincallback}) => {
+
+    const { boss } = useGrantsContext();
 
     const [oncer, setOncer] = useState(true)
 
@@ -19,9 +23,9 @@ const BlockHeader = ({ block, admin }) => {
 
     const [updated, setUpdated] = useState('');
 
-    const { boss } = useGrantsContext();
-
     const [adminToggle, setAdminToggle] = useState(null);
+
+    const username = buildName(block.user_model);
 
     const adminToggler = () => {
         adminToggle ? setAdminToggle(null) : setAdminToggle(block.id);
@@ -49,30 +53,48 @@ const BlockHeader = ({ block, admin }) => {
     const timer = () => {
         return (<>
             <Box fontSize={blockTimerFontSize}>{created}</Box>{
-                updated && updated !== created ?
-                    <Box pl={1} fontSize={blockTimerFontSize}>(modified {updated})</Box> : null}
+            updated && updated !== created ?
+                <Box pl={1} fontSize={blockTimerFontSize}>(modified {updated})</Box> : null}
         </>);
     }
 
     return (
         <>
-            {boss ? <BlockAdminPanel block={block} toggle={adminToggle} toggler={adminToggler} /> : null}
-            <Container pl='2' pr='2' pt='2' pb='2' bg='blue.100'>
+            {boss && admincallback || true ? <BlockAdminPanel block={block} toggle={adminToggle} toggler={adminToggler}
+                                                      admincallback={admincallback}/> : null}
+            <Container pl='2' pr='2' pt='2' pb='2' bg={invertColor('blue.100')}>
                 <Flex>
                     <HStack spacing='2'>
-                        <Avatar size={avatarBlockHeader} bg='teal.500' name={"Y P"} />
+                        <Tooltip label={username} bg={notApprovedColor}>
+                            <Avatar
+                                src={block.user_model.picture}
+                                size={avatarBlockHeader}
+                                bg={invertColor('teal.500')}
+                                name={username}
+                            />
+                        </Tooltip>
                         <Stack spacing={0}>
-                            <Box fontSize={blockHeaderFontSize}>{buildName(block.user_model)}</Box>
+                            <Box fontSize={blockHeaderFontSize}>{username}</Box>
                         </Stack>
                     </HStack>
-                    <Spacer />
+                    <Spacer/>
                     <Center>
                         <HStack spacing={0}>
                             {timer()}
-                            {boss ?
+                            {boss && admincallback ?
                                 <Box pl={2}>
-                                    <Center>{admin !== block.id ?
-                                        <HamburgerIcon boxSize={6} color='green.600' onClick={adminToggler} /> :
+                                    <Center>{adminToggle !== block.id ?
+                                        <Tooltip openDelay={500} label='Open admin panel'>
+                                            <IconButton
+                                                size={'xl'}
+                                                color={invertColor('green.700')}
+                                                fontSize='xl'
+                                                variant="linkIcon"
+                                                onClick={adminToggler}
+                                                icon={<HamburgerIcon aria-label={'Open menu'}/>}
+                                                aria-label={'Open Menu'}
+                                            />
+                                        </Tooltip> :
                                         null}
                                     </Center>
                                 </Box> : null}

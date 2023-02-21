@@ -1,50 +1,48 @@
 import { useState } from "react";
-import { Box, Flex, Link, Spacer, Checkbox, Stack } from '@chakra-ui/react';
+import {Box, Flex, Link, Spacer, Checkbox, Stack, Tooltip, IconButton} from '@chakra-ui/react';
 import { useGrantsContext } from "../../context/auth.context";
 import { useModelContext } from "../../context/model.context";
-import { CloseIcon, ArrowDownIcon, ArrowUpIcon } from '@chakra-ui/icons';
+import {CloseIcon, ArrowDownIcon, ArrowUpIcon, HamburgerIcon} from '@chakra-ui/icons';
 import { linkFontSize } from '../../startup/theming';
 import inAppEvent from "../../startup/events";
+import { httpApi } from "../../utils/http";
+import {invertColor} from "../../utils/utils";
+import {useUser} from "@auth0/nextjs-auth0/client";
 
-const BlockAdminPanel = ({ block, toggle, toggler }) => {
-    const { grants } = useGrantsContext();
+const BlockAdminPanel = ({ block, toggle, toggler, admincallback }) => {
+
+    const { boss } = useGrantsContext();
+
     const { state } = useModelContext();
-    const [saved, setSaved] = useState(true);
-    const base = { approved: block.approved, closed: block.closed, deleted: block.deleted }
-    const [stateAdmin, setStateAdmin] = useState(base);
-    const [firstState, setFirstState] = useState(stateAdmin);
-    const isBoss = ['admin', 'moder'].find(v => v === grants?.role);
-    const sameState = firstState.approved === stateAdmin.approved && firstState.closed === stateAdmin.closed && firstState.deleted === stateAdmin.deleted;
 
-    const fetcher = async () => {
-        const options = {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `Bearer ${grants.token}`,
-                'Content-type': 'application/json'
-            },
-            body: JSON.stringify(stateAdmin),
-        }
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/block/admin/${block.id}`,
-            options
-        );
-        return await response.json();
-    }
+    const [saved, setSaved] = useState(true);
+
+    const base = { approved: block?.approved, closed: block?.closed, deleted: block?.deleted }
+
+    const [stateAdmin, setStateAdmin] = useState(base);
+
+    const [firstState, setFirstState] = useState(stateAdmin);
+
+    const sameState = firstState.approved === stateAdmin?.approved && firstState?.closed === stateAdmin?.closed && firstState?.deleted === stateAdmin?.deleted;
 
     const save = async () => {
-        fetcher()
-            .then(done => {
-                setSaved(true);
-                setFirstState(done);
-                setStateAdmin({ approved: done.approved, closed: done.closed, deleted: done.deleted })
-                block.approved = done.approved;
-                block.closed = done.closed;
-                block.deleted = done.deleted;
-                state.model = [...state.model];
-                state.setModel(state.model);
-            })
-            .catch();
+        try {
+            const resp = await httpApi('PATCH', `/api/block/admin/${block.id}`, null, stateAdmin);
+            if (!resp) return;
+            const response = resp.responseData;
+            setSaved(true);
+            setFirstState(response);
+            setStateAdmin({ approved: response.approved, closed: response.closed, deleted: response.deleted })
+            block.approved = response.approved;
+            block.closed = response.closed;
+            block.deleted = response.deleted;
+            // state.model = [...state.model];
+            // state.setModel(state.model);
+            admincallback(stateAdmin);
+            toggler();
+        } catch (error) {
+            inAppEvent.emit('errorEvent', [500, error]);
+        }
     }
 
     const reset = () => {
@@ -58,24 +56,14 @@ const BlockAdminPanel = ({ block, toggle, toggler }) => {
 
     const moveUp = async () => {
         try {
-            const options = {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${grants.token}`,
-                    'Content-type': 'application/json'
-                }
-            }
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/block/up/${block.id}`,
-                options
-            );
-            const responseData = await response.json();
+            const response = await httpApi('PATCH', `/api/block/up/${block.id}`);
+            if (!response) return;
             if (response.status !== 200) {
-                inAppEvent.emit('errorEvent', [response.status, responseData]);
+                inAppEvent.emit('errorEvent', [response.status, response.responseData]);
                 return;
             }
-            const i1 = state.model.findIndex(m => m.id === responseData.obj1.id);
-            const i2 = state.model.findIndex(m => m.id === responseData.obj2.id);
+            const i1 = state.model.findIndex(m => m.id === response.responseData.obj1.id);
+            const i2 = state.model.findIndex(m => m.id === response.responseData.obj2.id);
             if (i1 < 0 || i2 < 0) return;
             [state.model[i1], state.model[i2]] = [state.model[i2], state.model[i1]];
             state.model = [...state.model];
@@ -87,24 +75,14 @@ const BlockAdminPanel = ({ block, toggle, toggler }) => {
 
     const moveDown = async () => {
         try {
-            const options = {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${grants.token}`,
-                    'Content-type': 'application/json'
-                }
-            }
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/block/down/${block.id}`,
-                options
-            );
-            const responseData = await response.json();
+            const response = await httpApi('PATCH', `/api/block/down/${block.id}`);
+            if (!response) return;
             if (response.status !== 200) {
-                inAppEvent.emit('errorEvent', [response.status, responseData]);
+                inAppEvent.emit('errorEvent', [response.status, response.responseData]);
                 return;
             }
-            const i1 = state.model.findIndex(m => m.id === responseData.obj1.id);
-            const i2 = state.model.findIndex(m => m.id === responseData.obj2.id);
+            const i1 = state.model.findIndex(m => m.id === response.responseData.obj1.id);
+            const i2 = state.model.findIndex(m => m.id === response.responseData.obj2.id);
             if (i1 < 0 || i2 < 0) return;
             [state.model[i1], state.model[i2]] = [state.model[i2], state.model[i1]];
             state.model = [...state.model];
@@ -114,37 +92,76 @@ const BlockAdminPanel = ({ block, toggle, toggler }) => {
         }
     }
 
-
     return (
-        isBoss && (toggle === block.id) ?
-            <Box p={2}>
+        (boss && toggle === block.id) ?
+            <Box p={2} borderBottomColor={invertColor('gray.300')} bg={invertColor('gray.300')}>
                 <Flex alignItems='center'>
                     <Stack spacing={5} direction='row'>
-                        <Checkbox colorScheme='green' id='approved' isChecked={stateAdmin?.approved} onChange={e => reState(e)}>
+                        <Checkbox variant='checkbox1' colorScheme='green' id='approved' isChecked={stateAdmin?.approved} onChange={e => reState(e)}>
+                            <Tooltip label='Users will see just approved blocks, not approved see just author.'>
                             Approved
+                            </Tooltip>
                         </Checkbox>
-                        <Checkbox colorScheme='orange' id='closed' isChecked={stateAdmin?.closed} onChange={e => reState(e)}>
+                        <Checkbox variant='checkbox1' colorScheme='orange' id='closed' isChecked={stateAdmin?.closed} onChange={e => reState(e)}>
+                            <Tooltip label="No new replies to this block possible, comments still can get new replies.">
                             closed
+                            </Tooltip>
                         </Checkbox>
-                        <Checkbox colorScheme='red' id='deleted' isChecked={stateAdmin?.deleted} onChange={e => reState(e)}>
+                        <Checkbox variant='checkbox1' colorScheme='red' id='deleted' isChecked={stateAdmin?.deleted} onChange={e => reState(e)}>
+                            <Tooltip label="Users will not see deleted blocks. To see deleted for you, allow it at menu.">
                             deleted
+                            </Tooltip>
                         </Checkbox>
                     </Stack>
                     <Spacer />
                     <Stack spacing={5} direction='row'>
                         {!(saved || sameState) ?
                             <>
-                                <Link fontSize={linkFontSize} pl='2' color='green.700' onClick={() => save()}>Save</Link>
-                                <Link fontSize={linkFontSize} pl='0' color='orange.400' onClick={() => reset()}>Reset</Link>
+                                <Tooltip openDelay={500} hasArrow label="Save your selections.">
+                                <Link fontSize={linkFontSize} pl='2' color={invertColor('green.600')} onClick={() => save()}>Save</Link>
+                                </Tooltip>
+                                <Tooltip openDelay={500} hasArrow label="Revert all selections back.">
+                                <Link fontSize={linkFontSize} pl='0' color={invertColor('orange.400')} onClick={() => reset()}>Reset</Link>
+                                </Tooltip>
                             </> : null}
                     </Stack>
                     <Spacer />
                     <Stack spacing={5} direction='row' alignItems='center'>
                         <Stack spacing={2} direction='row' alignItems='center'>
-                            <ArrowUpIcon boxSize={6} color='blue.600' onClick={() => moveUp()} />
-                            <ArrowDownIcon boxSize={6} color='blue.600' onClick={() => moveDown()} />
+                            <Tooltip openDelay={500} label='Move this block up'>
+                                <IconButton
+                                    size={'xl'}
+                                    color={invertColor('blue.600')}
+                                    fontSize='2xl'
+                                    variant="linkIcon"
+                                    onClick={() => moveUp()}
+                                    icon={<ArrowUpIcon aria-label={'move block up'}/>}
+                                    aria-label={'Open Menu'}
+                                />
+                            </Tooltip>
+                            <Tooltip openDelay={500} label='Move this block down'>
+                                <IconButton
+                                    size={'xl'}
+                                    color={invertColor('blue.600')}
+                                    fontSize='2xl'
+                                    variant="linkIcon"
+                                    onClick={() => moveDown()}
+                                    icon={<ArrowDownIcon aria-label={'move block down'}/>}
+                                    aria-label={'Open Menu'}
+                                />
+                            </Tooltip>
                         </Stack>
-                        <CloseIcon boxSize={4} color='blue.600' onClick={() => toggler()} />
+                        <Tooltip openDelay={500} label='Close this admin panel'>
+                            <IconButton
+                                size={'xl'}
+                                color={invertColor('blue.600')}
+                                fontSize='md'
+                                variant="linkIcon"
+                                onClick={() => toggler()}
+                                icon={<CloseIcon aria-label={'move block down'}/>}
+                                aria-label={'Open Menu'}
+                            />
+                        </Tooltip>
                     </Stack>
                 </Flex>
             </Box> : null);

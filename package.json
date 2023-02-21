@@ -9,33 +9,35 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@auth0/auth0-react": "^1.12.0",
-    "@auth0/nextjs-auth0": "^1.9.2",
-    "@chakra-ui/icons": "^2.0.11",
-    "@chakra-ui/react": "^2.3.7",
+    "@auth0/auth0-react": "^2.0.0",
+    "@auth0/nextjs-auth0": "^2.2.1",
+    "@chakra-ui/icons": "^2.0.14",
+    "@chakra-ui/react": "^2.4.4",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@fortawesome/fontawesome-free-solid": "^5.0.13",
-    "@fortawesome/fontawesome-svg-core": "^6.2.0",
-    "@fortawesome/free-solid-svg-icons": "^6.2.0",
+    "@fortawesome/fontawesome-svg-core": "^6.2.1",
+    "@fortawesome/free-solid-svg-icons": "^6.2.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
-    "chakra-dayzed-datepicker": "^0.2.5",
+    "chakra-dayzed-datepicker": "^0.2.6",
     "cross-env": "^7.0.3",
     "date-fns": "^2.29.3",
     "dayzed": "^3.2.3",
     "formik": "^2.2.9",
-    "framer-motion": "^7.6.5",
-    "jsonwebtoken": "^8.5.1",
-    "next": "^13.0.2",
+    "framer-motion": "^9.0.4",
+    "jsonwebtoken": "^9.0.0",
+    "next": "^13.1.1",
     "next-joi": "^2.2.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-icons": "^4.7.1",
     "react-infinite-scroll-component": "^6.1.0",
-    "react-router-dom": "^6.4.3",
-    "react-waypoint": "^10.3.0"
+    "react-router-dom": "^6.6.1",
+    "react-waypoint": "^10.3.0",
+    "v8": "^0.1.0"
   },
   "devDependencies": {
-    "eslint": "^8.27.0",
-    "eslint-config-next": "^13.0.2"
+    "eslint": "^8.30.0",
+    "eslint-config-next": "^13.1.1"
   }
 }

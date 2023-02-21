@@ -1,66 +1,44 @@
-import { useState } from "react";
-import { Box, Flex, Link, Spacer, Checkbox, Stack } from '@chakra-ui/react';
-import { useGrantsContext } from "../../context/auth.context";
-import { useModelContext } from "../../context/model.context";
-import { CloseIcon } from '@chakra-ui/icons';
+import {useState} from "react";
+import {Box, Flex, Link, Spacer, Checkbox, Stack, Tooltip, IconButton} from '@chakra-ui/react';
+import {useGrantsContext} from "../../context/auth.context";
+import {useModelContext} from "../../context/model.context";
+import {CloseIcon} from '@chakra-ui/icons';
+import inAppEvent from "../../startup/events";
+import {httpApi} from "../../utils/http";
+import {invertColor} from "../../utils/utils";
+import {linkFontSize, checkbox1} from "../../startup/theming";
 
-const CommentAdminPanel = ({ comment, toggle, toggler, callback }) => {
+const CommentAdminPanel = ({comment, toggle, toggler, callback}) => {
 
-    const { grants } = useGrantsContext();
-
-    const { state } = useModelContext();
+    const {grants, boss} = useGrantsContext();
 
     const [saved, setSaved] = useState(true);
 
-    const base = { approved: comment.approved, closed: comment.closed, deleted: comment.deleted }
+    const base = {approved: comment?.approved, closed: comment?.closed, deleted: comment?.deleted}
 
     const [stateAdmin, setStateAdmin] = useState(base);
 
     const [firstState, setFirstState] = useState(stateAdmin);
 
-    const isBoss = ['admin', 'moder'].find(v => v === grants?.role);
-
-    const sameState = firstState.approved === stateAdmin.approved && firstState.closed === stateAdmin.closed && firstState.deleted === stateAdmin.deleted;
-
-    const fetcher = async () => {
-        const options = {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `Bearer ${grants.token}`,
-                'Content-type': 'application/json'
-            },
-            body: JSON.stringify(stateAdmin),
-        }
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/comment/admin/${comment.id}`,
-            options
-        );
-        return await response.json();
-    }
-
-    const closeDiscussionsBelowComment = (cmt = comment) => {
-        state.model.find(b => b.id === cmt.ref_block).comments.forEach(c => {
-            if (c.ref_parent === cmt.id) {
-                c.closed = comment.closed;
-                closeDiscussionsBelowComment(c);
-            }
-        })
-    }
+    const sameState = firstState?.approved === stateAdmin?.approved && firstState?.closed === stateAdmin?.closed && firstState?.deleted === stateAdmin?.deleted;
 
     const save = async () => {
-        fetcher()
-            .then(done => {
-                setSaved(true);
-                setFirstState(done);
-                setStateAdmin({ approved: done.approved, closed: done.closed, deleted: done.deleted })
-                comment.approved = done.approved;
-                comment.closed = done.closed;
-                comment.deleted = done.deleted;
-                closeDiscussionsBelowComment(comment);
-                callback(comment.closed);
-                toggler();
-            })
-            .catch();
+        try {
+            const resp = await httpApi('PATCH', `/api/comment/admin/${comment.id}`, null, stateAdmin);
+            if (!resp) return;
+            const response = resp.responseData;
+            setSaved(true);
+            setFirstState(response);
+            setStateAdmin({approved: response.approved, closed: response.closed, deleted: response.deleted})
+            comment.approved = response.approved;
+            comment.closed = response.closed;
+            comment.deleted = response.deleted;
+            callback(stateAdmin);
+            toggler();
+        } catch (error) {
+            console.log("Error:", error);
+            inAppEvent.emit('errorEvent', [500, error]);
+        }
     }
 
     const reset = () => {
@@ -69,33 +47,61 @@ const CommentAdminPanel = ({ comment, toggle, toggler, callback }) => {
 
     const reState = (e) => {
         setSaved(false);
-        setStateAdmin({ ...stateAdmin, [e.target.id]: e.target.checked });
+        setStateAdmin({...stateAdmin, [e.target.id]: e.target.checked});
     }
 
     return (
-        (isBoss && toggle === comment.id) ?
-            <Box p={2} borderBottom={'1px solid'} borderBottomColor='gray.200' bg='white'>
+        (boss && toggle === comment.id) ?
+            <Box p={2} borderBottom={'1px solid'} borderBottomColor={invertColor('gray.300')}
+                 bg={invertColor('gray.200')}>
                 <Flex alignItems='center'>
                     <Stack spacing={5} direction='row'>
-                        <Checkbox colorScheme='green' id='approved' isChecked={stateAdmin?.approved} onChange={e => reState(e)}>
-                            Approved
-                        </Checkbox>
-                        <Checkbox colorScheme='orange' id='closed' isChecked={stateAdmin?.closed} onChange={e => reState(e)}>
-                            closed
-                        </Checkbox>
-                        <Checkbox colorScheme='red' id='deleted' isChecked={stateAdmin?.deleted} onChange={e => reState(e)}>
-                            deleted
-                        </Checkbox>
+                        <Tooltip openDelay={500} hasArrow
+                                 label='Users will see just approved comments, not approved see just author.'>
+                            <Checkbox variant='checkbox2' colorScheme='green' id='approved' isChecked={stateAdmin?.approved}
+                                      onChange={e => reState(e)}>
+                                Approved
+                            </Checkbox>
+                        </Tooltip>
+                        <Tooltip openDelay={500} hasArrow
+                                 label="No new replies to this reply possible.">
+                            <Checkbox variant='checkbox2' colorScheme='orange' id='closed' isChecked={stateAdmin?.closed}
+                                      onChange={e => reState(e)}>
+                                closed
+                            </Checkbox>
+                        </Tooltip>
+                        <Tooltip openDelay={500} hasArrow
+                                 label="Users will not see deleted replies.">
+                            <Checkbox variant='checkbox2' colorScheme='red' id='deleted' isChecked={stateAdmin?.deleted}
+                                      onChange={e => reState(e)}>
+                                deleted
+                            </Checkbox>
+                        </Tooltip>
                     </Stack>
-                    <Spacer />
-                    <Stack spacing={5} direction='row' pr={5}>
+                    <Spacer/>
+                    <Stack spacing={5} direction='row'>
                         {!(saved || sameState) ?
                             <>
-                                <Link fontSize='sm' pl='2' color='green.700' onClick={() => save()}>Save</Link>
-                                <Link fontSize='sm' pl='0' color='orange.400' onClick={() => reset()}>Reset</Link>
+                                <Tooltip openDelay={500} hasArrow label="Save your selections.">
+                                    <Link fontSize={linkFontSize} pl='2' color={invertColor('green.600')} onClick={() => save()}>Save</Link>
+                                </Tooltip>
+                                <Tooltip openDelay={500} hasArrow label="Revert all selections back.">
+                                    <Link fontSize={linkFontSize} pl='0' color={invertColor('orange.500')} onClick={() => reset()}>Reset</Link>
+                                </Tooltip>
                             </> : null}
                     </Stack>
-                    <CloseIcon boxSize={4} color='blue.600' onClick={toggler} />
+                    <Spacer/>
+                    <Tooltip openDelay={500} label='Close this admin panel'>
+                        <IconButton
+                            size={'xl'}
+                            color={invertColor('blue.600')}
+                            fontSize='md'
+                            variant="linkIcon"
+                            onClick={() => toggler()}
+                            icon={<CloseIcon aria-label={'move block down'}/>}
+                            aria-label={'Open Menu'}
+                        />
+                    </Tooltip>
                 </Flex>
             </Box> : null);
 }

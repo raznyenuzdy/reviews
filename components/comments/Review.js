@@ -10,26 +10,27 @@ import {
 import { useGrantsContext } from "../../context/auth.context";
 import { useModelContext } from "../../context/model.context";
 import { useMenuContext } from "../../context/menu.context";
-import { adjustLoadedBlock } from '../../db/model2';
+import { adjustLoadedBlock } from '../../db/model';
 import { key } from '../../utils/utils';
 import { useToast } from '@chakra-ui/react';
 import { useDisclosure } from '@chakra-ui/react';
 import { SingleDatepicker } from 'chakra-dayzed-datepicker';
+import {useUser} from "@auth0/nextjs-auth0/client";
 
 // import LoginButton from '../LoginButton';
 
 const Review = () => {
-    const { grants, grantsLoading } = useGrantsContext();
-    const { getAccessTokenSilently, isAuthenticated, logout } = useAuth0();
+    const { grants, grantsLoading, boss } = useGrantsContext();
     const { model, setModel } = useModelContext();
-    const { menu, setMenu } = useMenuContext();
+    const { menu, adForm, setAdForm } = useMenuContext();
     const [text, setText] = useState('');
     const [label, setLabel] = useState("");
     const [gbl, setGbl] = useState("");
     const [textAreaBlured, setTextAreaBlured] = useState(false);
-    const { loginWithPopup, login } = useAuth0();
     const { isOpen, onOpen, onClose } = useDisclosure();
-    menu.reviewForm = { isOpen, onOpen, onClose }
+    menu.reviewForm = { isOpen, onOpen, onClose };
+
+    const { isLoading } = useUser();
     // menu.setReviewForm({ isOpen, onOpen, onClose });
 
     const [gblPlaceholder, setGblPlaceholder] = useState('QWER1234567');
@@ -38,15 +39,11 @@ const Review = () => {
 
     const absentRole = (!grants || !grants.role);
 
-    const askLogin = !isAuthenticated;//(!grantsLoading && !absentRole && ['', 'anonymouse'].find(v => v === grants.role));
-
     // const openProfile = true;//(!grantsLoading && !absentRole && ['guest'].find(v => v === grants.role));
 
     const isTextareaEmty = text.length === 0;
 
     const isGblEmpty = gbl.length === 0;
-
-    const isBoss = ['admin', 'moder'].find(v => v === grants?.role);
 
     const rewiewDrawerFontSize = ['sm', 'lg', 'xl', 'xl', 'xl'];
     const datesLabelSize = ['40%', '40%', '50%', '45%', '35%','25%'];
@@ -120,7 +117,6 @@ const Review = () => {
     }
 
     const addComment = async (block) => {
-        grants.token = grants.token ? grants.token : await getAccessTokenSilently();
         const options = {
             headers: {
                 'Authorization': `Bearer ${grants.token}`,
@@ -158,7 +154,6 @@ const Review = () => {
     const onSubmit = async (event) => {
         event.preventDefault();
         if (grantsLoading) return false;
-        if (askLogin) loginWithPopup();
         const obj = {
             id: key(),
             type: 'review',
@@ -183,18 +178,7 @@ const Review = () => {
             return !isTextareaEmty
         }
         return ((!isTextareaEmty) && (!isGblEmpty))
-        // return false
     }
-
-    const onTextAreaEdit = (e) => {
-        // text = e;
-        // setText(e);
-        // console.log("TEXT:", e, text);
-        // setIsTextareaEmty(text.length === 0)
-    }
-    // gbl.length === 0
-
-    const buttonSaveVariant = isAuthenticated ? 'solid' : 'outline';
 
     const Cancel = () => {
         setText("");
@@ -203,24 +187,21 @@ const Review = () => {
         onClose();
     }
 
-    // {promptToSignUp ? (<LoginButton
-    //     colorScheme="blue"
-    //     className="btn btn-primary btn-block"
-    //     disabled={grantsLoading}
-    //     tabIndex={0}
-    //     size='sm'
-    //     testId="navbar-login-mobile">
-    //     Log in / Sign up
-    // </LoginButton>
-    // ) : null}
-
     return (
         <Box w='100%' m={[2, 0, 2, 0]} fontSize={['md', 'md', 'lg', 'lg', 'lg']}>
+            {isLoading ? null : boss ?
+                !adForm ?
             <Flex direction='row' alignItems='center' m={['3']}>
                 <Box>Have something to write?</Box>
                 <Spacer />
-                <Button colorScheme='blue' size={['lg', 'md']} fontSize={['xl', 'xl', 'xl', 'xl', 'lg']} onClick={menu.reviewForm.isOpen ? menu.reviewForm.onClose : menu.reviewForm.onOpen}>Publish review</Button>
-            </Flex>
+                <Button colorScheme='blue' size={['lg', 'md']} fontSize={['xl', 'xl', 'xl', 'xl', 'lg']} onClick={() => setAdForm(true)}>Publish Article</Button>
+            </Flex> : null :
+                <Flex direction='row' alignItems='center' m={['3']}>
+                    <Box>Have something to write?</Box>
+                    <Spacer />
+                    <Button colorScheme='blue' size={['lg', 'md']} fontSize={['xl', 'xl', 'xl', 'xl', 'lg']} onClick={menu.reviewForm.isOpen ? menu.reviewForm.onClose : menu.reviewForm.onOpen}>Publish review</Button>
+                </Flex>
+            }
             <Drawer
                 isOpen={menu.reviewForm.isOpen}
                 placement='top'

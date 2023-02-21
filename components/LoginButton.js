@@ -1,15 +1,17 @@
 // src/components/login-button.js
 
 import React from 'react';
+import { useRouter } from 'next/router';
 import { Button } from '@chakra-ui/react';
 import { useAuth0 } from '@auth0/auth0-react';
+import NextLink from 'next/link'
+import { Link } from '@chakra-ui/react'
 
 const LoginButton = ({ colorScheme, children, className, icon, tabIndex, testId, disabled=false, size='sm' }) => {
-    const { loginWithPopup, loginWithRedirect } = useAuth0();
+    const router = useRouter();
     return (
         <Button
-            onClick={loginWithPopup}
-            // onClick={loginWithRedirect}
+            onClick={() => router.push('/api/auth/login')}
             colorScheme={colorScheme}
             className={className}
             icon={icon}
