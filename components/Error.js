@@ -16,7 +16,8 @@ const Error = () => {
     inAppEvent.on('forceLogout', forceLogout);
 
     function forceLogout() {
-        router.push('/api/auth/login');
+        console.log("DO LOGOUT");
+        router.push('/api/auth/logout');
     }
 
     function handleError(args) {

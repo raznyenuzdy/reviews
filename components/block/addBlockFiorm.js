@@ -4,22 +4,18 @@ import {
     Button,
     ButtonGroup,
     Checkbox,
-    Flex, IconButton,
-    Input, Link,
-    Spacer,
+    Flex,
+    Input, Spacer,
     Stack,
     Textarea,
     Tooltip,
     VStack
 } from '@chakra-ui/react';
-import {blockFontSize, blockFormButtonFontSize, linkFontSize} from '../../startup/theming';
-import inter from '../../startup/inter';
+import {blockFontSize, blockFormButtonFontSize} from '../../startup/theming';
 import inAppEvent from "../../startup/events";
 import {invertColor, key} from "../../utils/utils";
 import {adjustLoadedBlock} from '../../db/model';
 import {httpApi} from "../../utils/http";
-import BlockAdminPanel from "./BlockAdminPanel";
-import {ArrowDownIcon, ArrowUpIcon, CloseIcon} from "@chakra-ui/icons";
 import {useMenuContext} from "../../context/menu.context";
 import {useModelContext} from "../../context/model.context";
 
@@ -27,7 +23,7 @@ const AddBlockForm = () => {
 
     const {adForm, setAdForm} = useMenuContext();
 
-    const { state } = useModelContext();
+    const { addBlock } = useModelContext();
 
     const [disabled, setDisabled] = useState(false);
 
@@ -96,13 +92,12 @@ const AddBlockForm = () => {
             const headers = {'key': _key};
             const response = await httpApi('POST', '/api/block', headers, body);
             if (response) {
-                if (response.status !== 200) {
+                if (response.status !== 201) {
                     inAppEvent.emit('errorEvent', [response.status, response.responseData]);
                 }
-                if (response.status === 200) {
+                if (response.status === 201) {
                     const block = adjustLoadedBlock(response.responseData);
-                    state.model = [block].concat(state.model);
-                    state.setModel(state.model);
+                    addBlock(block);
                 }
             }
             setAdForm(false);
@@ -128,13 +123,13 @@ const AddBlockForm = () => {
         }
     }, [once, adForm]);
 
-    const reState = (e) => {
-        setSaved(false);
-        setStateAdmin({...stateAdmin, [e.target.id]: e.target.checked});
-    }
-
     return (
-        adForm ?
+        !adForm ?
+            <Flex direction='row' alignItems='center' m={['3']}>
+                <Box>Have something to write?</Box>
+                <Spacer />
+                <Button colorScheme='blue' size={['lg', 'md']} fontSize={['xl', 'xl', 'xl', 'xl', 'lg']} onClick={() => setAdForm(true)}>Publish Article as Superuser</Button>
+            </Flex> :
             <form onSubmit={onSubmit}>
                 <Box p={2} borderBottomColor={invertColor('gray.300')} bg={invertColor('gray.300')}>
                     <Flex alignItems='center'>
@@ -172,7 +167,6 @@ const AddBlockForm = () => {
                                 ref={iref}
                                 bg={() => invertColor('orange.50')}
                                 w='100%'
-                                // value={label}
                                 onChange={handleLabelChange}/>
                         </Box>
                         <Textarea
@@ -183,7 +177,6 @@ const AddBlockForm = () => {
                             ref={aref}
                             fontSize='md'
                             className="comment-form-textarea"
-                            // value={text}
                             onChange={handleTextChange}
                         />
                         <ButtonGroup variant='outline' spacing='6'>
@@ -200,7 +193,7 @@ const AddBlockForm = () => {
                         </ButtonGroup>
                     </VStack>
                 </Box>
-            </form> : null
+            </form>
     );
 };
 

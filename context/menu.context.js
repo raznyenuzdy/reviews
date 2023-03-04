@@ -9,6 +9,7 @@ export const MenuContextProvider = ({ children }) => {
     const [showReviewForm, setShowReviewForm] = useState(null);
     const [reviewForm, setReviewForm] = useState({});
     const [adForm, setAdForm] = useState(false);
+    const [adUserForm, setAdUserForm] = useState(false);
     const [replyForm, setReplyForm] = useState({});
     const [adminMenuComment, setAdminMenuComment] = useState(null);
     const [blockAccordionOpener, setBlockAccordionOpener] = useState([]);
@@ -36,7 +37,7 @@ export const MenuContextProvider = ({ children }) => {
     });
 
     return (
-        <MenuContext.Provider value={{menu, setMenu, adForm, setAdForm}}>
+        <MenuContext.Provider value={{menu, setMenu, adForm, setAdForm, adUserForm, setAdUserForm}}>
             {children}
         </MenuContext.Provider>)
 }

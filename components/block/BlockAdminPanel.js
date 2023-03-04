@@ -109,7 +109,7 @@ const BlockAdminPanel = ({ block, toggle, toggler, admincallback }) => {
                         </Checkbox>
                         <Checkbox variant='checkbox1' colorScheme='red' id='deleted' isChecked={stateAdmin?.deleted} onChange={e => reState(e)}>
                             <Tooltip label="Users will not see deleted blocks. To see deleted for you, allow it at menu.">
-                            deleted
+                            hidden
                             </Tooltip>
                         </Checkbox>
                     </Stack>

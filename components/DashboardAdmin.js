@@ -8,7 +8,7 @@ import {useMenuContext} from "../context/menu.context";
 import {useModelContext} from "../context/model.context";
 import {useDisclosure} from '@chakra-ui/react';
 import {maxWidthDashboardAdmin} from '../startup/theming';
-import {getBlocks} from '../db/model';
+import {getBlocksBackend, getBlocksFrontend} from '../db/model';
 import {httpApi} from "../utils/http";
 import Router from 'next/router';
 import {invertColor} from "../utils/utils";
@@ -24,11 +24,10 @@ const DashboardAdmin = () => {
     }
 
     const onSave = async () => {
-        const loaded = await getBlocks(0, undefined, menu.showDeleted);
-        state.page = 1;
-        state.setPage(state.page);
-        state.model = loaded;
-        state.setModel(state.model);
+        // state.page = 1;
+        // state.setPage(state.page);
+        // state.model = loaded.model;
+        // state.setModel(state.model);
         onClose();
         // Router.reload(window.location.pathname)
         // const header = {showDeleted: menu.showDeleted};

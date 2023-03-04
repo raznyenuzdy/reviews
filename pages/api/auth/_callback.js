@@ -91,7 +91,12 @@ export default handleAuth({
         try {
             await handleLogin(req, res, {
                 // Get the connection name from the Auth0 Dashboard
-                authorizationParams: { scope: 'openid profile email', audience: 'http://localhost:3000/'}
+                authorizationParams: {
+                    scope: 'openid profile email',
+                    audience: 'http://localhost:3000/',
+                    connection: 'google',
+                    prompt: "login"
+                }
             });
         } catch (error) {
             console.error(error);

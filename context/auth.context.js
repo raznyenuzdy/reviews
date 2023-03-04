@@ -6,11 +6,17 @@ export const GrantsContext = createContext({});
 export const GrantsContextProvider = ({children}) => {
 
     const { user, error, isLoading } = useUser();
-console.log("USERROLE:", user, error, isLoading);
+
     const boss = ['admin', 'moder'].find(v => v && v === user?.user_metadata?.role);
 
+    const orgType = 'org' === user?.user_metadata?.role;
+
+    const _user = !!user && !user.user_metadata?.role //&& !boss && !org;
+    console.log("USERROLE:", _user);
+    const grants = !!user ? {...user, role:user?.user_metadata?.role} : null;
+
     return (
-        <GrantsContext.Provider value={{grants: user, boss}}>
+        <GrantsContext.Provider value={{grants, boss, userType:_user, orgType, role:user?.user_metadata?.role}}>
             {children}
         </GrantsContext.Provider>)
 }

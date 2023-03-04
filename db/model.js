@@ -1,4 +1,5 @@
 import {applyHumanTime} from '../utils/utils';
+import {httpApi, httpApiSoft} from "../utils/http";
 
 export const getReplies = async (id) => {
     const comment = model.find(obj => obj.id === id);
@@ -110,10 +111,10 @@ const applyTypeBlock = (block) => {
     }
 }
 
-export const getBlocks = async (count = 0, session = {}, deleted) => {
+export const getBlocksBackend = async (count = 0, session = {}) => {
     try {
         let ret = [];
-        const blocks = await getBlocksDb(count, session, deleted);
+        const blocks = await getBlocksDb(`/api/block/next/${count}`, session);
         if (!blocks?.model) return ret;
         blocks.model.forEach((block) => {
             const done = adjustLoadedBlock(block);
@@ -125,33 +126,42 @@ export const getBlocks = async (count = 0, session = {}, deleted) => {
         throw error;
     }
 }
+//даже не думай объеденить их или их части.. ну его нахер
+export const getBlocksFrontend = async (count, lastPos) => {
+    try {
+        let ret = [];
+        const headers = {'Content-type': 'application/json'};
+        const blocks = await httpApiSoft('GET', `/api/block/next/${count}/${lastPos}`, headers);
+        if (!blocks?.responseData?.model) return ret;
+        const model = blocks.responseData?.model.map(block => adjustLoadedBlock(block));
+        return {model};
+    } catch (error) {
+        throw error;
+    }
+}
 
-const getBlocksDb = async (page, session = {}, deleted = false) => {
+const getBlocksDb = async (url, session) => {
     try {
         const options = {
+            method: 'GET',
             headers: {
                 'Content-type': 'application/json'
-            },
-            method: 'GET',
-        }
-        if (deleted) {
-            options.headers.showdeleted = 'true';
+            }
         }
         if (session?.accessToken) options.headers['Authorization'] = `Bearer ${session.accessToken}`;
         if (session?.idToken) options.headers['idToken'] = session.idToken;
-        console.log("URL:", `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/page/next/${page}`);
+        console.log("URL:", `${process.env.NEXT_PUBLIC_API_SERVER_URL}${url}`, options);
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/page/next/${page}`,
+            `${process.env.NEXT_PUBLIC_API_SERVER_URL}${url}`,
             options
         );
         const resp = await response.json();
         if (response.status !== 200) throw resp;
         // const resp = await httpApi('GET', `/api/block/page/${page}`);
         //случай поломки базы, если шлет пустоту
+        console.log(">>>>>>>", resp.model.map(m => m.position));
         const model = resp?.model?.filter(r => !!r) || [];
         resp.model = [].concat(model ?? []);
-        console.log();
-        console.log(resp);
         return resp
     } catch (error) {
         throw error

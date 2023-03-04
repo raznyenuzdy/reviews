@@ -1,10 +1,10 @@
 import React from 'react';
 import Head from 'next/head';
 import TimeLine from '../components/TimeLine';
-import { getPages } from '../db/model';
+import {getPages} from '../db/model';
 import Layout from '../components/Layout';
-import { ModelContextProvider } from '../context/model.context';
-import { MenuContextProvider } from '../context/menu.context';
+import {ModelContextProvider} from '../context/model.context';
+import {MenuContextProvider} from '../context/menu.context';
 import config from '../startup/config';
 import inter from '../startup/inter';
 
@@ -16,8 +16,7 @@ export async function getAllPageIds() {
             `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/page`
         );
         const responseData = await response.json();
-
-        const urls = responseData.map((page) => {
+        return responseData.map((page) => {
             paging.push[page];
             return {
                 params: {
@@ -26,7 +25,6 @@ export async function getAllPageIds() {
                 }
             }
         })
-        return urls;
     } catch (error) {
         throw error;
     }

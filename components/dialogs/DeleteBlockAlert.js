@@ -8,10 +8,12 @@ import {
     AlertDialogContent,
     AlertDialogOverlay,
 } from '@chakra-ui/react';
-import { useMenuContext } from "../../context/menu.context";
 import inAppEvent from "../../startup/events";
+import {useGrantsContext} from "../../context/auth.context";
 
-const DeleteCommentAlert = () => {
+const DeleteBlockAlert = () => {
+
+    const { boss } = useGrantsContext();
 
     const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -19,8 +21,8 @@ const DeleteCommentAlert = () => {
 
     const [params, setParams] = useState({});
 
-    inAppEvent.clear('deleteCommentAlert');
-    inAppEvent.on('deleteCommentAlert', (params) => {
+    inAppEvent.clear('deleteBlockAlert');
+    inAppEvent.on('deleteBlockAlert', (params) => {
         onOpen();
         setParams(params);
     });
@@ -31,8 +33,8 @@ const DeleteCommentAlert = () => {
 
     const delIt = () => {
         onClose();
-        if (params.comment)
-            inAppEvent.emit('deleteComment' + params.comment.id, params.comment);
+        if (params)
+            inAppEvent.emit('deleteBlock' + params.block.id, params.block);
     }
 
     return (
@@ -47,12 +49,12 @@ const DeleteCommentAlert = () => {
                 <AlertDialogOverlay>
                     <AlertDialogContent>
                         <AlertDialogHeader fontSize='lg' fontWeight='bold'>
-                            Do you want to delete this {params?.boss ? 'your' : null} comment
-                            {params?.comments ? <><br />With {params.comments} underneath comments tree</> : null}?
+                            Do you really want to delete this {boss ? 'your' : null} article?
+                            {params?.block?.comments?.length > 0 ? <><br />With {params.block.comments.length} underneath comments tree</> : null}?
                         </AlertDialogHeader>
 
                         <AlertDialogBody>
-                            <Box>{params?.comment?.text.substring(0, 60)}</Box>
+                            <Box>{params?.block?.text.substring(0, 260)}..</Box>
                         </AlertDialogBody>
 
                         <AlertDialogFooter>
@@ -70,4 +72,4 @@ const DeleteCommentAlert = () => {
     )
 }
 
-export default DeleteCommentAlert;
+export default DeleteBlockAlert;

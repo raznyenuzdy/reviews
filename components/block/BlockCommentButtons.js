@@ -6,6 +6,8 @@ import { ChatIcon } from '@chakra-ui/icons'
 import { blockButtonFontSize } from '../../startup/theming';
 import inAppEvent from '../../startup/events';
 import inter from '../../startup/inter';
+import {useState} from "react";
+import ReplyToBlock from "../dialogs/BlockReply";
 
 const BlockCommentButtons = ({
     block,
@@ -21,6 +23,8 @@ const BlockCommentButtons = ({
 
     const { menu } = useMenuContext();
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     const youCanDelete = boss || !block.deleted && !block.closed && block.ref_user === grants?.id && stillActual(block);
 
     const editor = () => {
@@ -31,9 +35,14 @@ const BlockCommentButtons = ({
 
     const openDialog = () => {
         inAppEvent.emit('replyOnBlock', block);
+        setIsModalOpen(true)
     }
 
     const color1 = opened.length > 0 || block.comments.length === 0 ? invertColor('gray.600') : invertColor('teal.600');
+
+    const openDeleteBlockDialog = () => {
+        inAppEvent.emit('deleteBlockAlert', { block });
+    }
 
     return (
         <Flex p='0' pr='2' h='2.5rem' direction='row' w='100%' bg={invertColor('gray.200')} _p={[2, 2, 3, 3, 3]} fontSize={blockButtonFontSize}>
@@ -72,7 +81,7 @@ const BlockCommentButtons = ({
                             <Button
                                 colorScheme='red'
                                 variant='link'
-                                onClick={() => deleteComment(id)}>
+                                onClick={openDeleteBlockDialog}>
                                 Delete
                             </Button>
                         </>

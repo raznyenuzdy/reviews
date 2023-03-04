@@ -41,8 +41,6 @@ const Comment = ({ depth, id, blockid, cutcomment, setcommentscountparent }) => 
 
     const [approve, setApprove] = useState(app);
 
-    console.log(">>>>>", approve, app);
-
     const youCanSee = !!boss || (!!app && !comment.deleted);// || (!comment.deleted && comment.ref_user === grants.id)
 
     const userName = buildName(comment.user_model);
@@ -85,6 +83,7 @@ const Comment = ({ depth, id, blockid, cutcomment, setcommentscountparent }) => 
     }
 
     const toDeleteComment = async (data) => {
+        console.log("DDDDDD", data);
         await httpDeleteComment(data, deleteCallback);
     }
 

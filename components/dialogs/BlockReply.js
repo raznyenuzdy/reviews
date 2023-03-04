@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import {
     Modal,
     ModalOverlay,
@@ -19,7 +19,7 @@ import { useMenuContext } from "../../context/menu.context";
 import { useGrantsContext } from "../../context/auth.context";
 import inAppEvent from '../../startup/events';
 import { replyTextareaFontSize, sizes, commentHeaderFontSize } from '../../startup/theming';
-import { key } from "../../utils/utils";
+import {invertColor, key} from "../../utils/utils";
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { httpApi } from "../../utils/http";
 
@@ -108,7 +108,7 @@ const ReplyToBlock = () => {
                             p={['5px', '', '', '', '', '']}
                             // m={0}
                             placeholder=""
-                            bg='orange.50'
+                            bg={invertColor('gray.100')}
                             size='sm'
                             w='100%'
                             h='6em'

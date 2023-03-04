@@ -9,6 +9,8 @@ import { blockTextFontSize, blockFontSize, notApprovedColor, deletedColor } from
 import {blockCountReplies, stillActual, nameString, invertColor} from "../../utils/utils";
 
 import BlockComments from "./BlockComments";
+import inAppEvent from "../../startup/events";
+import {httpDeleteBlock, httpDeleteComment} from "../../utils/http";
 
 const depth = 0;
 
@@ -18,7 +20,7 @@ const Block = ({ id }) => {
 
     const userName = nameString(grants?.user_model, grants);
 
-    const { state } = useModelContext();
+    const { state, deleteBlock } = useModelContext();
 
     const [isEditing, setIsEditing] = useState(false);
 
@@ -74,20 +76,22 @@ const Block = ({ id }) => {
         // setApprove(app());
     }, [setHeight, runApp])
 
-    const changer = (c) => {
-        setOpened(c);
-    }
+    const changer = c => setOpened(c);
 
-    const setcommentscount = () => {
-        const aa = blockCountReplies(state, id);
-        setCommentsCount(aa);
-    }
+    const setCommentsCnt = () => setCommentsCount(blockCountReplies(state, id));
 
-    const editIt = (ifit) => {
-        setIsEditing(ifit);
-    }
+    const editIt = ifIt => setIsEditing(ifIt);
 
-    const canedit = boss || (!block.deleted && !block.closed && block.ref_user === grants?.id && stillActual(block));
+    const deleteCallback = (error, data) => error ? httpError(error) : deleteBlock(data);
+
+    const httpError = response => inAppEvent.emit('errorEvent', [response.status, response.responseData]);
+
+    const toDeleteBlock = async data => await httpDeleteBlock(data, deleteCallback);
+
+    inAppEvent.clear('deleteBlock' + id);
+    inAppEvent.on('deleteBlock' + id, toDeleteBlock);
+
+    const canEdit = boss || (!block.deleted && !block.closed && block.ref_user === grants?.id && stillActual(block));
 
     return (
         youCanSee ?
@@ -105,7 +109,7 @@ const Block = ({ id }) => {
                                     block={block}
                                     setisediting={editIt}
                                     setblock={setBlock} /> :
-                                    <Box p='2' ref={textref} fontSize={blockTextFontSize}>{block.text}</Box>
+                                    <Box p='2' ref={textref} fontSize={blockTextFontSize}>{block.id} | {block.position} | {block.text}</Box>
                                 }
                                 <BlockCommentButtons
                                     isediting={isEditing}
@@ -117,7 +121,7 @@ const Block = ({ id }) => {
                                     closed={branchClosed()}
                                     // collapser={collapser}
                                     getheight={height}
-                                    canedit={canedit} />
+                                    canedit={canEdit} />
                                 {branchClosed() ? (<Center><Box p={2}>discussion closed</Box></Center>) : null}
                             </Box>
                         </Box>
@@ -127,7 +131,7 @@ const Block = ({ id }) => {
                                     <BlockComments
                                         blockid={block.id}
                                         depth={depth}
-                                        setcommentscountparent={setcommentscount}
+                                        setcommentscountparent={setCommentsCnt}
                                     />
                                 </Box>
                             </Box>

@@ -1,9 +1,8 @@
 import { Flex, Box, Link, Spacer, VStack } from '@chakra-ui/react';
-import React, { useEffect } from 'react';
 import Blocks from './Blocks';
 import { useModelContext } from '../context/model.context';
 import config from '../startup/config';
-import { key } from '../utils/utils';
+import InfoBlock from "./InfoBlock";
 
 const TimeLine = ({ paging }) => {
 
@@ -12,6 +11,7 @@ const TimeLine = ({ paging }) => {
     const { prevPageData, numPrevPage, pageData, numPage, nextPageData, numNextPage } = paging || {};
 
     return (<>
+            <InfoBlock/>
         <Blocks />
         {(!state.scrollable) ?
             <VStack w='100%'>
